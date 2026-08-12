@@ -1,96 +1,137 @@
 # EnquirySort
 
-AI-powered inbox triage built on your stack:
+AI-powered inbox triage:
 
-- **.NET 10 / C#** API with **FastEndpoints + Dapper + SQL Server** (`scaffold-fastendpoints-crud`)
-- **Svelte** admin UI (`ai-agent-platform-frontend` patterns)
+- **.NET 10 / C#** API — FastEndpoints + Dapper + SQL Server
+- **Svelte** admin UI
 - **OpenRouter** classification + reply drafting
-- **MailKit** IMAP/SMTP — replies and list forwards are real SMTP sends (unless `Mail:DryRun` is true)
+- **MailKit** IMAP/SMTP (real sends when `Mail:DryRun` is `false`)
+
+On startup the API **creates the database/schema if needed** and **seeds demo data** when tables are empty (`Seed:Enabled=true`).
 
 ```text
-Inbox (IMAP) → OpenRouter classifier → respond | route | ignore
-                     │                      │
-                     ▼                      ▼
-              Knowledge base reply    Mailing list forward (SMTP)
-                     │
-                     ▼
-              SQL audit + Svelte admin
+Inbox (IMAP) → OpenRouter → respond | route | ignore
+                  │              │
+                  ▼              ▼
+           Knowledge reply   Mailing list forward
 ```
 
-## Solution layout
+## Quick setup
 
-| Path | Purpose |
-|------|---------|
-| `src/EnquirySort.Api` | FastEndpoints API + inbox worker |
-| `src/EnquirySort.Web` | Svelte admin (mailing lists, KB, enquiries) |
-| `database/001_InitialSchema.sql` | SQL Server tables, indexes, seed data |
-| `scaffold-fastendpoints-crud/` | Backend skill |
-| `ai-agent-platform-frontend/` | Frontend skill |
+### 1. Prerequisites
 
-## Prerequisites
-
-- .NET 10 SDK
+- [.NET 10 SDK](https://dotnet.microsoft.com/download)
 - Node.js 20+
-- SQL Server (LocalDB / full / Docker)
+- Docker (recommended for SQL Server) **or** any SQL Server instance
 
-## Database
+### 2. Start SQL Server
 
 ```bash
-# Apply schema (adjust server as needed)
-sqlcmd -S localhost -i database/001_InitialSchema.sql
+docker compose up -d
+# waits until port 1433 is ready
 ```
 
-Update `src/EnquirySort.Api/appsettings.json` → `ConnectionStrings:EnquirySort`.
+Default connection (already in `appsettings.json`):
 
-## API
+```
+Server=localhost,1433;Database=EnquirySort;User Id=sa;Password=EnquirySort_Demo1!;TrustServerCertificate=True;Encrypt=False;
+```
+
+### 3. Run the API
 
 ```bash
 cd src/EnquirySort.Api
 dotnet run
-# listens on http://localhost:5180
+# http://localhost:5180
 ```
 
-### Configuration (`appsettings.json`)
+On first boot you’ll see logs like:
 
-| Section | Keys |
-|---------|------|
-| `Mail` | `EmailAddress`, `EmailPassword`, IMAP/SMTP hosts, `DryRun` |
-| `OpenRouter` | `ApiKey`, `Model` |
-| `EnquiryWorker` | `Enabled`, poll interval, confidence thresholds |
+- `Ensured database exists: EnquirySort`
+- `Applied EnquirySort schema…` (or `Schema already present`)
+- `Seeded mailing lists` / `Seeded knowledge articles` / `Seeded sample enquiries`
 
-**Sending mail:** set `Mail:DryRun` to `false` and provide valid mailbox credentials. The worker/API then sends real SMTP replies and list forwards via MailKit.
+Seed is **idempotent**: restarting won’t duplicate rows.
 
-Process the inbox once (without waiting for the worker):
-
-```http
-POST /enquiries/processInbox
-```
-
-Or enable continuous polling with `EnquiryWorker:Enabled=true`.
-
-### RPC-style routes (skill convention)
-
-- `POST /mailingLists/create` · `GET /mailingLists/get/{id}` · `POST /mailingLists/update` · `POST /mailingLists/delete`
-- `GET /mailingLists/listForDropdown` · `GET /mailingLists/listForDataTable`
-- Same shape for `/knowledgeArticles/*`
-- `GET /enquiries/listForDataTable` · `GET /enquiries/get/{id}` · `POST /enquiries/processInbox`
-
-## Web UI
+### 4. Run the admin UI
 
 ```bash
 cd src/EnquirySort.Web
-cp .env.example .env
+cp .env.example .env   # VITE_API_URL=http://localhost:5180
 npm install
 npm run dev
+# http://localhost:5173
 ```
 
-Hash routes for mailing lists, knowledge articles, and processed enquiries (create/update/delete with concurrency keys).
+### 5. Configure mail + OpenRouter (optional for live inbox)
 
-## Skills applied
+Edit `src/EnquirySort.Api/appsettings.json` (or use user-secrets / env vars):
 
-Greenfield choices documented for the FastEndpoints skill Step 0:
+| Setting | Purpose |
+|---------|---------|
+| `Mail:EmailAddress` / `Mail:EmailPassword` | IMAP+SMTP mailbox (Gmail: [App Password](https://myaccount.google.com/apppasswords)) |
+| `Mail:DryRun` | `true` = log only; `false` = **actually send** replies/forwards |
+| `OpenRouter:ApiKey` | From [openrouter.ai/keys](https://openrouter.ai/keys) |
+| `EnquiryWorker:Enabled` | `true` = poll inbox on a timer |
+| `Seed:Enabled` | `true` = auto schema + seed on startup |
+| `Seed:SampleEnquiries` | `true` = insert demo processed enquiries when empty |
 
-- Root entities (no Organization parent yet)
-- Template-style `MyErrorResponse` (`fatalError`, `concurrencyKeyInvalid`, `additionalData`)
-- `AllowAnonymous()` until auth is wired
-- Soft delete, COMB GUIDs (`RT.Comb.EnsureOrderedProvider.Sql`), `sp_getapplock` uniqueness, computed `ConcurrencyKey`
+Environment variable examples:
+
+```bash
+export ConnectionStrings__EnquirySort='Server=localhost,1433;Database=EnquirySort;User Id=sa;Password=EnquirySort_Demo1!;TrustServerCertificate=True;Encrypt=False;'
+export OpenRouter__ApiKey='sk-or-v1-...'
+export Mail__EmailAddress='you@gmail.com'
+export Mail__EmailPassword='your-app-password'
+export Mail__DryRun='false'
+```
+
+Process the inbox once:
+
+```bash
+curl -X POST http://localhost:5180/enquiries/processInbox
+```
+
+Or click **Process inbox** in the Enquiries page.
+
+## What gets seeded
+
+When tables are empty and `Seed:Enabled=true`:
+
+| Table | Demo rows |
+|-------|-----------|
+| Mailing lists | `sales`, `support`, `billing` |
+| Knowledge articles | password reset, pricing, custom domains, getting started |
+| Enquiries | sample **Respond** (password FAQ) + **Route** (enterprise quote → sales) |
+
+Turn seeding off in production:
+
+```json
+"Seed": { "Enabled": false }
+```
+
+## Manual schema (optional)
+
+If you prefer applying DDL yourself:
+
+```bash
+sqlcmd -S localhost,1433 -U sa -P 'EnquirySort_Demo1!' -C -i database/001_InitialSchema.sql
+```
+
+Runtime seed still fills empty tables when the API starts.
+
+## Project layout
+
+| Path | Purpose |
+|------|---------|
+| `src/EnquirySort.Api` | API + inbox worker + runtime bootstrap/seed |
+| `src/EnquirySort.Web` | Svelte admin |
+| `database/001_InitialSchema.sql` | SQL Server DDL |
+| `docker-compose.yml` | Local SQL Server |
+
+## Skills
+
+Built to match:
+
+- `scaffold-fastendpoints-crud` (vertical-slice FastEndpoints / Dapper / soft delete / concurrency keys)
+- `ai-agent-platform-frontend` (Svelte admin patterns)

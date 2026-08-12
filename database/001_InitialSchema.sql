@@ -1,3 +1,8 @@
+SET ANSI_NULLS ON;
+SET QUOTED_IDENTIFIER ON;
+SET ANSI_PADDING ON;
+GO
+
 /*
   EnquirySort initial schema — FastEndpoints + Dapper conventions.
   Run against SQL Server before starting the API.

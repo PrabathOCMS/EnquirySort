@@ -25,6 +25,7 @@ public static class StartupExtensions
         services.AddHttpClient<OpenRouterClient>();
         services.AddSingleton<ImapEmailClient>();
         services.AddSingleton<EnquiryPipeline>();
+        services.AddSingleton<DatabaseBootstrapper>();
         services.AddHostedService<EnquiryInboxWorker>();
         return services;
     }
