@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI Agent Platform Frontend"
+  short_description: "Build frontend pages using approved project patterns"
+  default_prompt: "Use $ai-agent-platform-frontend to implement this frontend change using the project's approved Svelte patterns."
