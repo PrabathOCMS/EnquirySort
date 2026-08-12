@@ -10,7 +10,7 @@ npm install
 npm run dev
 ```
 
-Default API base URL: `http://localhost:5180` (`VITE_API_URL`).
+Default API base URL: `http://localhost:5288` (`VITE_API_URL`).
 
 ## Scripts
 

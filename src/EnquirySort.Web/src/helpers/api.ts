@@ -4,5 +4,5 @@ export function getApiUrl(): string {
     return url.replace(/\/$/, "");
   }
 
-  return "http://localhost:5180";
+  return "http://localhost:5288";
 }

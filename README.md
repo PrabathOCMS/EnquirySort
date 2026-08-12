@@ -31,18 +31,35 @@ docker compose up -d
 # waits until port 1433 is ready
 ```
 
-Default connection (already in `appsettings.json`):
+**Docker SQL** (matches `docker-compose.yml`) — default in `appsettings.json`:
 
 ```
 Server=localhost,1433;Database=EnquirySort;User Id=sa;Password=EnquirySort_Demo1!;TrustServerCertificate=True;Encrypt=False;
 ```
+
+**SQL Server already installed on Windows** — use Windows auth in `appsettings.Development.json` (this overrides the Docker `sa` string):
+
+```json
+"ConnectionStrings": {
+  "EnquirySort": "Server=localhost;Database=EnquirySort;Trusted_Connection=True;TrustServerCertificate=True;"
+}
+```
+
+Other local variants:
+
+```text
+Server=.\\SQLEXPRESS;Database=EnquirySort;Trusted_Connection=True;TrustServerCertificate=True;
+Server=(localdb)\\MSSQLLocalDB;Database=EnquirySort;Trusted_Connection=True;TrustServerCertificate=True;
+```
+
+`Login failed for user 'sa'` almost always means the Docker `sa` password is still configured — switch to `Trusted_Connection=True` (or put your real SA password in the string).
 
 ### 3. Run the API
 
 ```bash
 cd src/EnquirySort.Api
 dotnet run
-# http://localhost:5180
+# http://localhost:5288
 ```
 
 On first boot you’ll see logs like:
@@ -57,7 +74,7 @@ Seed is **idempotent**: restarting won’t duplicate rows.
 
 ```bash
 cd src/EnquirySort.Web
-cp .env.example .env   # VITE_API_URL=http://localhost:5180
+cp .env.example .env   # VITE_API_URL=http://localhost:5288
 npm install
 npm run dev
 # http://localhost:5173
@@ -89,7 +106,7 @@ export Mail__DryRun='false'
 Process the inbox once:
 
 ```bash
-curl -X POST http://localhost:5180/enquiries/processInbox
+curl -X POST http://localhost:5288/enquiries/processInbox
 ```
 
 Or click **Process inbox** in the Enquiries page.
