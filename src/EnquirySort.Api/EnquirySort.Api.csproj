@@ -15,4 +15,10 @@
     <PackageReference Include="RT.Comb" Version="4.0.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\..\database\001_InitialSchema.sql"
+          Link="database\001_InitialSchema.sql"
+          CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

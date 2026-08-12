@@ -6,6 +6,7 @@ public sealed class AppSettings
     public MailSettings Mail { get; set; } = new();
     public OpenRouterSettings OpenRouter { get; set; } = new();
     public EnquiryWorkerSettings EnquiryWorker { get; set; } = new();
+    public SeedSettings Seed { get; set; } = new();
 }
 
 public sealed class ConnectionStringsSettings
