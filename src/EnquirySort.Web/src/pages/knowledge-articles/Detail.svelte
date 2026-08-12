@@ -1,0 +1,243 @@
+<script lang="ts">
+  import { onDestroy } from "svelte";
+  import { getApiUrl } from "../../helpers/api";
+  import {
+    getGeneralError,
+    parseResponse,
+    type MyErrorResponse,
+  } from "../../helpers/parseResponse";
+  import { formatDate, href, navigate } from "../../helpers/router";
+
+  type Props = {
+    id: string;
+  };
+
+  let { id }: Props = $props();
+
+  type KnowledgeArticle = {
+    id: string;
+    title: string;
+    slug: string;
+    content: string;
+    insertDateUtc: string;
+    updatedDateUtc: string;
+    concurrencyKey: string;
+  };
+
+  let pageLoading = $state<"loading" | "done" | "error">("loading");
+  let loadError = $state("");
+  let record = $state<KnowledgeArticle | null>(null);
+  let concurrencyKey = $state("");
+  let pageTitle = $state("Knowledge article");
+  let abortController: AbortController | null = null;
+  let lastLoadedId = $state("");
+
+  let deleteOpen = $state(false);
+  let deleteBusy = $state(false);
+  let deleteError = $state("");
+  let deleteConcurrencyAlert = $state("");
+  let deleteAdditionalData = $state("");
+
+  function buildBreadCrumbsAndPageTitle(entity: KnowledgeArticle): void {
+    pageTitle = entity.title;
+  }
+
+  async function loadData(): Promise<void> {
+    if (abortController) {
+      abortController.abort();
+    }
+    abortController = new AbortController();
+    const currentController = abortController;
+
+    pageLoading = "loading";
+    loadError = "";
+
+    try {
+      const response = await fetch(`${getApiUrl()}/knowledgeArticles/get/${id}`, {
+        method: "GET",
+        headers: { Accept: "application/json" },
+        signal: currentController.signal,
+      });
+
+      const parsed = await parseResponse<KnowledgeArticle | MyErrorResponse>(response);
+
+      if (!parsed.ok) {
+        pageLoading = "error";
+        loadError = getGeneralError(parsed.data as MyErrorResponse);
+        return;
+      }
+
+      record = parsed.data as KnowledgeArticle;
+      concurrencyKey = record.concurrencyKey;
+      buildBreadCrumbsAndPageTitle(record);
+      pageLoading = "done";
+      lastLoadedId = id;
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return;
+      }
+      pageLoading = "error";
+      loadError = "Unable to load knowledge article.";
+    }
+  }
+
+  function openDelete(): void {
+    deleteError = "";
+    deleteConcurrencyAlert = "";
+    deleteAdditionalData = "";
+    deleteOpen = true;
+  }
+
+  function closeDelete(): void {
+    if (deleteBusy) {
+      return;
+    }
+    deleteOpen = false;
+  }
+
+  async function confirmDelete(): Promise<void> {
+    if (!record) {
+      return;
+    }
+
+    deleteBusy = true;
+    deleteError = "";
+    deleteConcurrencyAlert = "";
+    deleteAdditionalData = "";
+
+    try {
+      const response = await fetch(`${getApiUrl()}/knowledgeArticles/delete`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: record.id,
+          concurrencyKey,
+        }),
+      });
+
+      const parsed = await parseResponse<MyErrorResponse>(response);
+
+      if (parsed.ok) {
+        navigate("/knowledge-articles");
+        return;
+      }
+
+      const error = parsed.data as MyErrorResponse;
+      if (error?.concurrencyKeyInvalid) {
+        deleteConcurrencyAlert = getGeneralError(error);
+        deleteAdditionalData = error.additionalData ?? "";
+        if (error.additionalData) {
+          try {
+            const current = JSON.parse(error.additionalData) as KnowledgeArticle;
+            if (current.concurrencyKey) {
+              concurrencyKey = current.concurrencyKey;
+            }
+          } catch {
+            // ignore
+          }
+        }
+        return;
+      }
+
+      deleteError = getGeneralError(error);
+    } catch {
+      deleteError = "Unable to delete knowledge article.";
+    } finally {
+      deleteBusy = false;
+    }
+  }
+
+  onDestroy(() => {
+    if (abortController) {
+      abortController.abort();
+    }
+  });
+
+  $effect(() => {
+    if (id !== lastLoadedId) {
+      void loadData();
+    }
+  });
+</script>
+
+<div class="page-card">
+  <div class="breadcrumbs">
+    <a href={href("/knowledge-articles")}>Knowledge articles</a>
+    <span>/</span>
+    <span>{pageTitle}</span>
+  </div>
+
+  {#if pageLoading === "loading"}
+    <p class="muted">Loading…</p>
+  {:else if pageLoading === "error"}
+    <div class="alert alert-error">{loadError}</div>
+    <button type="button" class="btn btn-secondary" onclick={loadData}>Retry</button>
+  {:else if record}
+    <div class="page-heading">
+      <div>
+        <h1>{record.title}</h1>
+        <p>Knowledge article details</p>
+      </div>
+      <div class="actions">
+        <a class="btn btn-primary" href={href(`/knowledge-articles/${record.id}/update`)}>Edit</a>
+        <button type="button" class="btn btn-danger" onclick={openDelete}>Delete</button>
+      </div>
+    </div>
+
+    <dl class="dl">
+      <div class="dl-item">
+        <dt>Title</dt>
+        <dd>{record.title}</dd>
+      </div>
+      <div class="dl-item">
+        <dt>Slug</dt>
+        <dd>{record.slug}</dd>
+      </div>
+      <div class="dl-item">
+        <dt>Content</dt>
+        <dd>{record.content}</dd>
+      </div>
+      <div class="dl-item">
+        <dt>Updated</dt>
+        <dd>{formatDate(record.updatedDateUtc)}</dd>
+      </div>
+      <div class="dl-item">
+        <dt>Created</dt>
+        <dd>{formatDate(record.insertDateUtc)}</dd>
+      </div>
+    </dl>
+  {/if}
+</div>
+
+{#if deleteOpen && record}
+  <div class="modal-backdrop" role="presentation">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="delete-title">
+      <h2 id="delete-title">Delete knowledge article</h2>
+      <p>Delete <strong>{record.title}</strong>?</p>
+
+      {#if deleteConcurrencyAlert}
+        <div class="alert alert-warn">
+          {deleteConcurrencyAlert}
+          {#if deleteAdditionalData}
+            <pre>{deleteAdditionalData}</pre>
+          {/if}
+          <p>Review the current data, then retry delete if you still want to remove it.</p>
+        </div>
+      {/if}
+
+      {#if deleteError}
+        <div class="alert alert-error">{deleteError}</div>
+      {/if}
+
+      <div class="btn-row">
+        <button type="button" class="btn btn-danger" disabled={deleteBusy} onclick={confirmDelete}>
+          {deleteConcurrencyAlert ? "Retry delete" : "Delete"}
+        </button>
+        <button type="button" class="btn btn-secondary" disabled={deleteBusy} onclick={closeDelete}>Cancel</button>
+      </div>
+    </div>
+  </div>
+{/if}

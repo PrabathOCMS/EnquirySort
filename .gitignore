@@ -1,15 +1,31 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.swp
+
+## Node / Svelte
+node_modules/
+dist/
+.vite/
 .env
+.env.local
+
+## Python (legacy)
 .venv/
 venv/
 __pycache__/
 *.py[cod]
 *.egg-info/
 .pytest_cache/
-.coverage
-htmlcov/
 .mypy_cache/
 .ruff_cache/
-dist/
-build/
-*.log
+
+## Misc
 .DS_Store
+*.log
+.idea/
+.coverage
+htmlcov/

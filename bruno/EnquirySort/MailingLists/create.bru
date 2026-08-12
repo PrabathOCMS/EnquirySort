@@ -1,0 +1,19 @@
+meta {
+  name: mailingLists create
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/mailingLists/create
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "partnerships",
+    "address": "partners@example.com",
+    "description": "Partner and affiliate enquiries"
+  }
+}
