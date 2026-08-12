@@ -1,0 +1,20 @@
+# EnquirySort routing configuration
+knowledge_base_dir: knowledge_base
+processed_folder: EnquirySort/Processed
+respond_confidence_threshold: 0.65
+route_confidence_threshold: 0.55
+max_body_chars: 8000
+poll_interval_seconds: 60
+
+mailing_lists:
+  - name: sales
+    address: sales@example.com
+    description: New business, demos, pricing negotiations, partnership enquiries.
+
+  - name: support
+    address: support@example.com
+    description: Technical issues, bugs, outages, account access problems needing a human.
+
+  - name: billing
+    address: billing@example.com
+    description: Invoices, refunds, payment failures, contract and licensing questions.
