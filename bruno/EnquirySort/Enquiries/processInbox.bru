@@ -1,0 +1,15 @@
+meta {
+  name: enquiries processInbox
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/enquiries/processInbox
+  body: json
+  auth: none
+}
+
+body:json {
+  {}
+}

@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/EnquirySort.Api/EnquirySort.Api.csproj" />
+  </Folder>
+</Solution>

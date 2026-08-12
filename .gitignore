@@ -1,0 +1,19 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.swp
+
+## Node / Svelte
+node_modules/
+dist/
+.vite/
+.env
+.env.local
+
+## Misc
+.DS_Store
+*.log
+.idea/

@@ -2,9 +2,9 @@ using System.Data;
 using Dapper;
 using EnquirySort.Api.Configuration;
 using EnquirySort.Api.Enums;
-using EnquirySort.Api.Features.KnowledgeArticles.CreateKnowledgeArticle;
-using EnquirySort.Api.Features.KnowledgeArticles.DeleteKnowledgeArticle;
-using EnquirySort.Api.Features.KnowledgeArticles.UpdateKnowledgeArticle;
+using EnquirySort.Api.Features.MailingLists.CreateMailingList;
+using EnquirySort.Api.Features.MailingLists.DeleteMailingList;
+using EnquirySort.Api.Features.MailingLists.UpdateMailingList;
 using EnquirySort.Api.Models;
 using EnquirySort.Api.Utilities;
 using Microsoft.Data.SqlClient;
@@ -12,19 +12,19 @@ using RT.Comb;
 
 namespace EnquirySort.Api.Repositories;
 
-public sealed class KnowledgeArticlesRepository
+public sealed class MailingListsRepository
 {
     private readonly AppSettings _appSettings;
     private readonly ICombProvider _combProvider;
 
-    public KnowledgeArticlesRepository(AppSettings appSettings, ICombProvider combProvider)
+    public MailingListsRepository(AppSettings appSettings, ICombProvider combProvider)
     {
         _appSettings = appSettings;
         _combProvider = combProvider;
     }
 
-    public async Task<(SqlQueryResult, KnowledgeArticle?)> CreateKnowledgeArticleAsync(
-        CreateKnowledgeArticleRequest req,
+    public async Task<(SqlQueryResult, MailingList?)> CreateMailingListAsync(
+        CreateMailingListRequest req,
         Guid? adminUserUid,
         string? adminUserDisplayName,
         string? remoteIpAddress)
@@ -39,9 +39,9 @@ declare @_now datetime2(3) = sysutcdatetime();
 declare @_lockResult int;
 declare @_data table (
     id uniqueidentifier,
-    Title nvarchar(200),
-    Slug nvarchar(200),
-    Content nvarchar(max),
+    Name nvarchar(100),
+    Address nvarchar(320),
+    Description nvarchar(500),
     InsertDateUtc datetime2(3),
     UpdatedDateUtc datetime2(3),
     Deleted bit,
@@ -59,23 +59,23 @@ begin
 end
 else
 begin
-    insert into tblKnowledgeArticles (id, Title, Slug, Content, InsertDateUtc, UpdatedDateUtc)
-    output inserted.id, inserted.Title, inserted.Slug, inserted.Content,
+    insert into tblMailingLists (id, Name, Address, Description, InsertDateUtc, UpdatedDateUtc)
+    output inserted.id, inserted.Name, inserted.Address, inserted.Description,
            inserted.InsertDateUtc, inserted.UpdatedDateUtc, inserted.Deleted, inserted.ConcurrencyKey
     into @_data
-    select @id, @title, @slug, @content, @_now, @_now
+    select @id, @name, @address, @description, @_now, @_now
     where not exists (
-        select * from tblKnowledgeArticles
-        where Deleted = 0 and Slug = @slug);
+        select * from tblMailingLists
+        where Deleted = 0 and Name = @name);
 
     if @@ROWCOUNT = 1
     begin
         set @_result = 1;
-        insert into tblKnowledgeArticles_Log
+        insert into tblMailingLists_Log
             (id, UpdatedByUid, UpdatedByDisplayName, UpdatedByIpAddress, LogDescription,
-             KnowledgeArticleId, Title, Slug, Content, Deleted, LogAction)
+             MailingListId, Name, Address, Description, Deleted, LogAction)
         select @logId, @adminUserUid, @adminUserDisplayName, @remoteIpAddress, null,
-               d.id, d.Title, d.Slug, d.Content, d.Deleted, 'Insert'
+               d.id, d.Name, d.Address, d.Description, d.Deleted, 'Insert'
         from @_data d;
     end
     else
@@ -90,18 +90,18 @@ select * from @_data;";
         DynamicParameters parameters = new();
         parameters.Add("@id", id, DbType.Guid);
         parameters.Add("@logId", _combProvider.Create(), DbType.Guid);
-        parameters.Add("@title", req.Title, DbType.String, size: 200);
-        parameters.Add("@slug", req.Slug, DbType.String, size: 200);
-        parameters.Add("@content", req.Content, DbType.String, size: -1);
-        parameters.Add("@lockResourceName", $"tblKnowledgeArticles_Slug_{Toolbox.Sha1Upper(req.Slug!)}", DbType.AnsiString, size: 200);
+        parameters.Add("@name", req.Name, DbType.String, size: 100);
+        parameters.Add("@address", req.Address, DbType.String, size: 320);
+        parameters.Add("@description", req.Description, DbType.String, size: 500);
+        parameters.Add("@lockResourceName", $"tblMailingLists_Name_{Toolbox.Sha1Upper(req.Name!)}", DbType.AnsiString, size: 200);
         parameters.Add("@adminUserUid", adminUserUid, DbType.Guid);
         parameters.Add("@adminUserDisplayName", adminUserDisplayName, DbType.String, size: 200);
         parameters.Add("@remoteIpAddress", remoteIpAddress, DbType.AnsiString, size: 45);
 
         using SqlMapper.GridReader gridReader = await sqlConnection.QueryMultipleAsync(sql, parameters);
         int resultCode = await gridReader.ReadFirstAsync<int>();
-        KnowledgeArticle? entity = !gridReader.IsConsumed
-            ? await gridReader.ReadFirstOrDefaultAsync<KnowledgeArticle>()
+        MailingList? entity = !gridReader.IsConsumed
+            ? await gridReader.ReadFirstOrDefaultAsync<MailingList>()
             : null;
 
         SqlQueryResult result = resultCode switch
@@ -114,24 +114,24 @@ select * from @_data;";
         return (result, entity);
     }
 
-    public async Task<KnowledgeArticle?> GetKnowledgeArticleAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<MailingList?> GetMailingListAsync(Guid id, CancellationToken cancellationToken = default)
     {
         using SqlConnection sqlConnection = new(_appSettings.ConnectionStrings.EnquirySort);
 
         // lang=sql
         string sql = @"
-select id, Title, Slug, Content, InsertDateUtc, UpdatedDateUtc, Deleted, ConcurrencyKey
-from tblKnowledgeArticles
+select id, Name, Address, Description, InsertDateUtc, UpdatedDateUtc, Deleted, ConcurrencyKey
+from tblMailingLists
 where Deleted = 0 and id = @id";
 
         DynamicParameters parameters = new();
         parameters.Add("@id", id, DbType.Guid);
         CommandDefinition cmd = new(sql, parameters, cancellationToken: cancellationToken);
-        return await sqlConnection.QueryFirstOrDefaultAsync<KnowledgeArticle>(cmd);
+        return await sqlConnection.QueryFirstOrDefaultAsync<MailingList>(cmd);
     }
 
-    public async Task<(SqlQueryResult, KnowledgeArticle?)> UpdateKnowledgeArticleAsync(
-        UpdateKnowledgeArticleRequest req,
+    public async Task<(SqlQueryResult, MailingList?)> UpdateMailingListAsync(
+        UpdateMailingListRequest req,
         Guid? adminUserUid,
         string? adminUserDisplayName,
         string? remoteIpAddress)
@@ -145,16 +145,16 @@ declare @_now datetime2(3) = sysutcdatetime();
 declare @_lockResult int;
 declare @_data table (
     id uniqueidentifier,
-    Title nvarchar(200),
-    Slug nvarchar(200),
-    Content nvarchar(max),
+    Name nvarchar(100),
+    Address nvarchar(320),
+    Description nvarchar(500),
     InsertDateUtc datetime2(3),
     UpdatedDateUtc datetime2(3),
     Deleted bit,
     ConcurrencyKey varbinary(4),
-    OldTitle nvarchar(200),
-    OldSlug nvarchar(200),
-    OldContent nvarchar(max));
+    OldName nvarchar(100),
+    OldAddress nvarchar(320),
+    OldDescription nvarchar(500));
 
 begin transaction;
 
@@ -168,32 +168,32 @@ begin
 end
 else
 begin
-    update tblKnowledgeArticles
-    set Title = @title,
-        Slug = @slug,
-        Content = @content,
+    update tblMailingLists
+    set Name = @name,
+        Address = @address,
+        Description = @description,
         UpdatedDateUtc = @_now
-    output inserted.id, inserted.Title, inserted.Slug, inserted.Content,
+    output inserted.id, inserted.Name, inserted.Address, inserted.Description,
            inserted.InsertDateUtc, inserted.UpdatedDateUtc, inserted.Deleted, inserted.ConcurrencyKey,
-           deleted.Title, deleted.Slug, deleted.Content
+           deleted.Name, deleted.Address, deleted.Description
     into @_data
     where id = @id
       and Deleted = 0
       and ConcurrencyKey = @concurrencyKey
       and not exists (
-          select * from tblKnowledgeArticles x
-          where x.Deleted = 0 and x.Slug = @slug and x.id <> @id);
+          select * from tblMailingLists x
+          where x.Deleted = 0 and x.Name = @name and x.id <> @id);
 
     if @@ROWCOUNT = 1
     begin
         set @_result = 1;
-        insert into tblKnowledgeArticles_Log
+        insert into tblMailingLists_Log
             (id, UpdatedByUid, UpdatedByDisplayName, UpdatedByIpAddress, LogDescription,
-             KnowledgeArticleId, Title, Slug, Content, Deleted,
-             OldTitle, OldSlug, OldContent, OldDeleted, LogAction)
+             MailingListId, Name, Address, Description, Deleted,
+             OldName, OldAddress, OldDescription, OldDeleted, LogAction)
         select @logId, @adminUserUid, @adminUserDisplayName, @remoteIpAddress, null,
-               d.id, d.Title, d.Slug, d.Content, d.Deleted,
-               d.OldTitle, d.OldSlug, d.OldContent, 0, 'Update'
+               d.id, d.Name, d.Address, d.Description, d.Deleted,
+               d.OldName, d.OldAddress, d.OldDescription, 0, 'Update'
         from @_data d;
         commit transaction;
     end
@@ -202,8 +202,8 @@ begin
         rollback transaction;
 
         select top 1
-            id, Title, Slug, Content, InsertDateUtc, UpdatedDateUtc, Deleted, ConcurrencyKey
-        from tblKnowledgeArticles
+            id, Name, Address, Description, InsertDateUtc, UpdatedDateUtc, Deleted, ConcurrencyKey
+        from tblMailingLists
         where id = @id and Deleted = 0;
 
         -- result decided in C#
@@ -214,7 +214,7 @@ end
 if @_result = 1
 begin
     select @_result;
-    select id, Title, Slug, Content, InsertDateUtc, UpdatedDateUtc, Deleted, ConcurrencyKey from @_data;
+    select id, Name, Address, Description, InsertDateUtc, UpdatedDateUtc, Deleted, ConcurrencyKey from @_data;
 end
 else if @_result = 3
 begin
@@ -229,11 +229,11 @@ end";
         DynamicParameters parameters = new();
         parameters.Add("@id", req.id, DbType.Guid);
         parameters.Add("@logId", _combProvider.Create(), DbType.Guid);
-        parameters.Add("@title", req.Title, DbType.String, size: 200);
-        parameters.Add("@slug", req.Slug, DbType.String, size: 200);
-        parameters.Add("@content", req.Content, DbType.String, size: -1);
+        parameters.Add("@name", req.Name, DbType.String, size: 100);
+        parameters.Add("@address", req.Address, DbType.String, size: 320);
+        parameters.Add("@description", req.Description, DbType.String, size: 500);
         parameters.Add("@concurrencyKey", req.ConcurrencyKey, DbType.Binary, size: 4);
-        parameters.Add("@lockResourceName", $"tblKnowledgeArticles_Slug_{Toolbox.Sha1Upper(req.Slug!)}", DbType.AnsiString, size: 200);
+        parameters.Add("@lockResourceName", $"tblMailingLists_Name_{Toolbox.Sha1Upper(req.Name!)}", DbType.AnsiString, size: 200);
         parameters.Add("@adminUserUid", adminUserUid, DbType.Guid);
         parameters.Add("@adminUserDisplayName", adminUserDisplayName, DbType.String, size: 200);
         parameters.Add("@remoteIpAddress", remoteIpAddress, DbType.AnsiString, size: 45);
@@ -243,8 +243,8 @@ end";
 
         if (resultCode == 1)
         {
-            KnowledgeArticle? updated = !gridReader.IsConsumed
-                ? await gridReader.ReadFirstOrDefaultAsync<KnowledgeArticle>()
+            MailingList? updated = !gridReader.IsConsumed
+                ? await gridReader.ReadFirstOrDefaultAsync<MailingList>()
                 : null;
             return (SqlQueryResult.Ok, updated);
         }
@@ -254,8 +254,8 @@ end";
             return (SqlQueryResult.RecordAlreadyExists, null);
         }
 
-        KnowledgeArticle? current = !gridReader.IsConsumed
-            ? await gridReader.ReadFirstOrDefaultAsync<KnowledgeArticle>()
+        MailingList? current = !gridReader.IsConsumed
+            ? await gridReader.ReadFirstOrDefaultAsync<MailingList>()
             : null;
 
         if (current is null)
@@ -271,84 +271,8 @@ end";
         return (SqlQueryResult.RecordAlreadyExists, current);
     }
 
-    public async Task<DropdownResponse> ListKnowledgeArticlesForDropdownAsync(
-        string? search,
-        long? requestCounter,
-        CancellationToken cancellationToken = default)
-    {
-        using SqlConnection sqlConnection = new(_appSettings.ConnectionStrings.EnquirySort);
-
-        // lang=sql
-        string sql = @"
-select id as Value, Title as Text
-from tblKnowledgeArticles
-where Deleted = 0
-  and (@search is null or Title like '%' + @search + '%')
-order by Title";
-
-        DynamicParameters parameters = new();
-        parameters.Add("@search", string.IsNullOrWhiteSpace(search) ? null : search.Trim(), DbType.String, size: 200);
-        CommandDefinition cmd = new(sql, parameters, cancellationToken: cancellationToken);
-        List<SelectListItem> records = (await sqlConnection.QueryAsync<SelectListItem>(cmd)).AsList();
-        return new DropdownResponse { RequestCounter = requestCounter, Records = records };
-    }
-
-    public async Task<DataTableResponse<KnowledgeArticle>> ListKnowledgeArticlesForDataTableAsync(
-        int pageNumber,
-        int pageSize,
-        SortType sort,
-        long? requestCounter,
-        string? search,
-        CancellationToken cancellationToken = default)
-    {
-        using SqlConnection sqlConnection = new(_appSettings.ConnectionStrings.EnquirySort);
-        string orderBy = sort switch
-        {
-            SortType.Created => "id desc",
-            SortType.Updated => "UpdatedDateUtc desc",
-            _ => "Title asc"
-        };
-
-        // lang=sql
-        string sql = $@"
-declare @_search nvarchar(200) = @search;
-
-select count(*)
-from tblKnowledgeArticles
-where Deleted = 0
-  and (@_search is null or Title like '%' + @_search + '%');
-
-select id, Title, Slug, Content, InsertDateUtc, UpdatedDateUtc, Deleted, ConcurrencyKey
-from tblKnowledgeArticles
-where Deleted = 0
-  and (@_search is null or Title like '%' + @_search + '%')
-order by {orderBy}
-offset @offset rows fetch next @pageSize rows only;";
-
-        DynamicParameters parameters = new();
-        parameters.Add("@search", string.IsNullOrWhiteSpace(search) ? null : search.Trim(), DbType.String, size: 200);
-        parameters.Add("@offset", (pageNumber - 1) * pageSize, DbType.Int32);
-        parameters.Add("@pageSize", pageSize, DbType.Int32);
-
-        CommandDefinition cmd = new(sql, parameters, cancellationToken: cancellationToken);
-        using SqlMapper.GridReader gridReader = await sqlConnection.QueryMultipleAsync(cmd);
-        int totalCount = await gridReader.ReadFirstAsync<int>();
-        List<KnowledgeArticle> records = !gridReader.IsConsumed
-            ? (await gridReader.ReadAsync<KnowledgeArticle>()).AsList()
-            : [];
-
-        return new DataTableResponse<KnowledgeArticle>
-        {
-            RequestCounter = requestCounter,
-            Records = records,
-            PageNumber = pageNumber,
-            PageSize = pageSize,
-            TotalCount = totalCount
-        };
-    }
-
-    public async Task<SqlQueryResult> DeleteKnowledgeArticleAsync(
-        DeleteKnowledgeArticleRequest req,
+    public async Task<SqlQueryResult> DeleteMailingListAsync(
+        DeleteMailingListRequest req,
         Guid? adminUserUid,
         string? adminUserDisplayName,
         string? remoteIpAddress)
@@ -361,17 +285,17 @@ declare @_result int = 0;
 declare @_now datetime2(3) = sysutcdatetime();
 declare @_data table (
     id uniqueidentifier,
-    Title nvarchar(200),
-    Slug nvarchar(200),
-    Content nvarchar(max),
+    Name nvarchar(100),
+    Address nvarchar(320),
+    Description nvarchar(500),
     Deleted bit,
     OldDeleted bit,
     ConcurrencyKey varbinary(4));
 
-update tblKnowledgeArticles
+update tblMailingLists
 set Deleted = 1,
     UpdatedDateUtc = @_now
-output inserted.id, inserted.Title, inserted.Slug, inserted.Content, inserted.Deleted,
+output inserted.id, inserted.Name, inserted.Address, inserted.Description, inserted.Deleted,
        deleted.Deleted, inserted.ConcurrencyKey
 into @_data
 where id = @id
@@ -381,21 +305,20 @@ where id = @id
 if @@ROWCOUNT = 1
 begin
     set @_result = 1;
-    -- TODO: cascade-delete child records here once they exist
-    insert into tblKnowledgeArticles_Log
+    insert into tblMailingLists_Log
         (id, UpdatedByUid, UpdatedByDisplayName, UpdatedByIpAddress, LogDescription,
-         KnowledgeArticleId, Title, Slug, Content, Deleted,
-         OldTitle, OldSlug, OldContent, OldDeleted, LogAction)
+         MailingListId, Name, Address, Description, Deleted,
+         OldName, OldAddress, OldDescription, OldDeleted, LogAction)
     select @logId, @adminUserUid, @adminUserDisplayName, @remoteIpAddress, null,
-           d.id, d.Title, d.Slug, d.Content, d.Deleted,
-           d.Title, d.Slug, d.Content, d.OldDeleted, 'Delete'
+           d.id, d.Name, d.Address, d.Description, d.Deleted,
+           d.Name, d.Address, d.Description, d.OldDeleted, 'Delete'
     from @_data d;
 end
 
 select @_result;
-select id, Title, Slug, Content, InsertDateUtc = sysutcdatetime(), UpdatedDateUtc = sysutcdatetime(),
+select id, Name, Address, Description, InsertDateUtc = sysutcdatetime(), UpdatedDateUtc = sysutcdatetime(),
        Deleted = 0, ConcurrencyKey
-from tblKnowledgeArticles
+from tblMailingLists
 where id = @id;";
 
         DynamicParameters parameters = new();
@@ -408,8 +331,8 @@ where id = @id;";
 
         using SqlMapper.GridReader gridReader = await sqlConnection.QueryMultipleAsync(sql, parameters);
         int resultCode = await gridReader.ReadFirstAsync<int>();
-        KnowledgeArticle? current = !gridReader.IsConsumed
-            ? await gridReader.ReadFirstOrDefaultAsync<KnowledgeArticle>()
+        MailingList? current = !gridReader.IsConsumed
+            ? await gridReader.ReadFirstOrDefaultAsync<MailingList>()
             : null;
 
         if (resultCode == 1)
@@ -430,34 +353,95 @@ where id = @id;";
         return SqlQueryResult.UnknownError;
     }
 
-    public async Task<List<KnowledgeArticle>> SearchAsync(
-        string query,
-        int topK = 3,
+    public async Task<DropdownResponse> ListMailingListsForDropdownAsync(
+        string? search,
+        long? requestCounter,
         CancellationToken cancellationToken = default)
     {
         using SqlConnection sqlConnection = new(_appSettings.ConnectionStrings.EnquirySort);
-        string? search = string.IsNullOrWhiteSpace(query) ? null : query.Trim();
 
         // lang=sql
         string sql = @"
-select top (@topK)
-    id, Title, Slug, Content, InsertDateUtc, UpdatedDateUtc, Deleted, ConcurrencyKey
-from tblKnowledgeArticles
+select id as Value, Name as Text
+from tblMailingLists
 where Deleted = 0
-  and (
-        @search is null
-        or Title like '%' + @search + '%'
-        or Slug like '%' + @search + '%'
-        or Content like '%' + @search + '%'
-      )
-order by
-    case when Title like '%' + @search + '%' then 0 else 1 end,
-    UpdatedDateUtc desc";
+  and (@search is null or Name like '%' + @search + '%' or Address like '%' + @search + '%')
+order by Name";
 
         DynamicParameters parameters = new();
-        parameters.Add("@topK", topK, DbType.Int32);
-        parameters.Add("@search", search, DbType.String, size: 200);
+        parameters.Add("@search", string.IsNullOrWhiteSpace(search) ? null : search.Trim(), DbType.String, size: 100);
         CommandDefinition cmd = new(sql, parameters, cancellationToken: cancellationToken);
-        return (await sqlConnection.QueryAsync<KnowledgeArticle>(cmd)).AsList();
+        List<SelectListItem> records = (await sqlConnection.QueryAsync<SelectListItem>(cmd)).AsList();
+        return new DropdownResponse { RequestCounter = requestCounter, Records = records };
+    }
+
+    public async Task<DataTableResponse<MailingList>> ListMailingListsForDataTableAsync(
+        int pageNumber,
+        int pageSize,
+        SortType sort,
+        long? requestCounter,
+        string? search,
+        CancellationToken cancellationToken = default)
+    {
+        using SqlConnection sqlConnection = new(_appSettings.ConnectionStrings.EnquirySort);
+        string orderBy = sort switch
+        {
+            SortType.Created => "InsertDateUtc desc",
+            SortType.Updated => "UpdatedDateUtc desc",
+            SortType.Email => "Address asc",
+            _ => "Name asc"
+        };
+
+        // lang=sql
+        string sql = $@"
+declare @_search nvarchar(100) = @search;
+
+select count(*)
+from tblMailingLists
+where Deleted = 0
+  and (@_search is null or Name like '%' + @_search + '%' or Address like '%' + @_search + '%' or Description like '%' + @_search + '%');
+
+select id, Name, Address, Description, InsertDateUtc, UpdatedDateUtc, Deleted, ConcurrencyKey
+from tblMailingLists
+where Deleted = 0
+  and (@_search is null or Name like '%' + @_search + '%' or Address like '%' + @_search + '%' or Description like '%' + @_search + '%')
+order by {orderBy}
+offset @offset rows fetch next @pageSize rows only;";
+
+        DynamicParameters parameters = new();
+        parameters.Add("@search", string.IsNullOrWhiteSpace(search) ? null : search.Trim(), DbType.String, size: 100);
+        parameters.Add("@offset", (pageNumber - 1) * pageSize, DbType.Int32);
+        parameters.Add("@pageSize", pageSize, DbType.Int32);
+
+        CommandDefinition cmd = new(sql, parameters, cancellationToken: cancellationToken);
+        using SqlMapper.GridReader gridReader = await sqlConnection.QueryMultipleAsync(cmd);
+        int totalCount = await gridReader.ReadFirstAsync<int>();
+        List<MailingList> records = !gridReader.IsConsumed
+            ? (await gridReader.ReadAsync<MailingList>()).AsList()
+            : [];
+
+        return new DataTableResponse<MailingList>
+        {
+            RequestCounter = requestCounter,
+            Records = records,
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            TotalCount = totalCount
+        };
+    }
+
+    public async Task<List<MailingList>> ListAllActiveAsync(CancellationToken cancellationToken = default)
+    {
+        using SqlConnection sqlConnection = new(_appSettings.ConnectionStrings.EnquirySort);
+
+        // lang=sql
+        string sql = @"
+select id, Name, Address, Description, InsertDateUtc, UpdatedDateUtc, Deleted, ConcurrencyKey
+from tblMailingLists
+where Deleted = 0
+order by Name";
+
+        CommandDefinition cmd = new(sql, cancellationToken: cancellationToken);
+        return (await sqlConnection.QueryAsync<MailingList>(cmd)).AsList();
     }
 }
