@@ -59,7 +59,7 @@ Server=(localdb)\\MSSQLLocalDB;Database=EnquirySort;Trusted_Connection=True;Trus
 ```bash
 cd src/EnquirySort.Api
 dotnet run
-# http://localhost:5180
+# http://localhost:5288
 ```
 
 On first boot you’ll see logs like:
@@ -74,7 +74,7 @@ Seed is **idempotent**: restarting won’t duplicate rows.
 
 ```bash
 cd src/EnquirySort.Web
-cp .env.example .env   # VITE_API_URL=http://localhost:5180
+cp .env.example .env   # VITE_API_URL=http://localhost:5288
 npm install
 npm run dev
 # http://localhost:5173
@@ -106,7 +106,7 @@ export Mail__DryRun='false'
 Process the inbox once:
 
 ```bash
-curl -X POST http://localhost:5180/enquiries/processInbox
+curl -X POST http://localhost:5288/enquiries/processInbox
 ```
 
 Or click **Process inbox** in the Enquiries page.
