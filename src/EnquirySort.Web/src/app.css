@@ -435,6 +435,21 @@ table.data-table th.sorted {
   color: #4d5b63;
 }
 
+.badge.draft {
+  background: #fff4e5;
+  color: #9a5b00;
+}
+
+.badge.sent {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
+.badge.none {
+  background: #eef1f3;
+  color: #4d5b63;
+}
+
 .alert {
   border-radius: 12px;
   padding: 0.85rem 1rem;

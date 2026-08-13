@@ -1,5 +1,7 @@
 namespace EnquirySort.Api.Configuration;
 
+using EnquirySort.Api.Enums;
+
 public sealed class AppSettings
 {
     public ConnectionStringsSettings ConnectionStrings { get; set; } = new();
@@ -43,4 +45,9 @@ public sealed class EnquiryWorkerSettings
     public double RespondConfidenceThreshold { get; set; } = 0.65;
     public double RouteConfidenceThreshold { get; set; } = 0.55;
     public int MaxBodyChars { get; set; } = 8000;
+
+    /// <summary>
+    /// Automatic = send AI replies immediately; Draft = save for human approve/send.
+    /// </summary>
+    public ResponseMode ResponseMode { get; set; } = ResponseMode.Draft;
 }

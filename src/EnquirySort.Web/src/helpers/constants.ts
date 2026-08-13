@@ -10,6 +10,18 @@ export const ENQUIRY_ACTION_LABELS: Record<number, string> = {
   [ENQUIRY_ACTION.ROUTE]: "Route",
 };
 
+export const REPLY_STATUS = {
+  NONE: 0,
+  DRAFT: 1,
+  SENT: 2,
+} as const;
+
+export const REPLY_STATUS_LABELS: Record<number, string> = {
+  [REPLY_STATUS.NONE]: "None",
+  [REPLY_STATUS.DRAFT]: "Draft",
+  [REPLY_STATUS.SENT]: "Sent",
+};
+
 export const SORT = {
   UNSORTED: "unsorted",
   UPDATED: "updated",
@@ -37,4 +49,22 @@ export function enquiryActionLabel(action: number | string | null | undefined): 
 
   const numeric = typeof action === "number" ? action : Number(action);
   return ENQUIRY_ACTION_LABELS[numeric] ?? String(action ?? "—");
+}
+
+export function replyStatusLabel(status: number | string | null | undefined): string {
+  if (typeof status === "string") {
+    const normalized = status.trim().toLowerCase();
+    if (normalized === "none") {
+      return "None";
+    }
+    if (normalized === "draft") {
+      return "Draft";
+    }
+    if (normalized === "sent") {
+      return "Sent";
+    }
+  }
+
+  const numeric = typeof status === "number" ? status : Number(status);
+  return REPLY_STATUS_LABELS[numeric] ?? String(status ?? "—");
 }
