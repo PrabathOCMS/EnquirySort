@@ -4,7 +4,7 @@ using FastEndpoints;
 
 namespace EnquirySort.Api.Features.Enquiries.ProcessInbox;
 
-public sealed class ProcessInboxEndpoint : Endpoint<ProcessInboxRequest, List<Enquiry>>
+public sealed class ProcessInboxEndpoint : EndpointWithoutRequest<List<Enquiry>>
 {
     private readonly EnquiryPipeline _pipeline;
 
@@ -17,7 +17,7 @@ public sealed class ProcessInboxEndpoint : Endpoint<ProcessInboxRequest, List<En
         AllowAnonymous();
     }
 
-    public override async Task HandleAsync(ProcessInboxRequest req, CancellationToken ct)
+    public override async Task HandleAsync(CancellationToken ct)
     {
         List<Enquiry> results = await _pipeline.ProcessInboxAsync(ct);
         await Send.OkAsync(results);
