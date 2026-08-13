@@ -80,28 +80,31 @@ npm run dev
 # http://localhost:5173
 ```
 
-### 5. Configure mail + OpenRouter (optional for live inbox)
+### 5. Configure mail + OpenRouter (required for Process inbox)
 
-Edit `src/EnquirySort.Api/appsettings.json` (or use user-secrets / env vars):
+Edit `src/EnquirySort.Api/appsettings.Development.json`:
 
-| Setting | Purpose |
-|---------|---------|
-| `Mail:EmailAddress` / `Mail:EmailPassword` | IMAP+SMTP mailbox (Gmail: [App Password](https://myaccount.google.com/apppasswords)) |
-| `Mail:DryRun` | `true` = log only; `false` = **actually send** replies/forwards |
-| `OpenRouter:ApiKey` | From [openrouter.ai/keys](https://openrouter.ai/keys) |
-| `EnquiryWorker:Enabled` | `true` = poll inbox on a timer |
-| `Seed:Enabled` | `true` = auto schema + seed on startup |
-| `Seed:SampleEnquiries` | `true` = insert demo processed enquiries when empty |
-
-Environment variable examples:
-
-```bash
-export ConnectionStrings__EnquirySort='Server=localhost,1433;Database=EnquirySort;User Id=sa;Password=EnquirySort_Demo1!;TrustServerCertificate=True;Encrypt=False;'
-export OpenRouter__ApiKey='sk-or-v1-...'
-export Mail__EmailAddress='you@gmail.com'
-export Mail__EmailPassword='your-app-password'
-export Mail__DryRun='false'
+```json
+"Mail": {
+  "EmailAddress": "you@gmail.com",
+  "EmailPassword": "your-gmail-app-password",
+  "DryRun": true
+},
+"OpenRouter": {
+  "ApiKey": "sk-or-v1-..."
+}
 ```
+
+Or set environment variables before `dotnet run`:
+
+```powershell
+$env:Mail__EmailAddress="you@gmail.com"
+$env:Mail__EmailPassword="your-gmail-app-password"
+$env:OpenRouter__ApiKey="sk-or-v1-..."
+dotnet run
+```
+
+Gmail needs IMAP enabled and an [App Password](https://myaccount.google.com/apppasswords) (not your normal password). Keep `Mail:DryRun` as `true` until you want real SMTP sends.
 
 Process the inbox once:
 
