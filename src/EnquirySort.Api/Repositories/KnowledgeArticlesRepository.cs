@@ -432,6 +432,21 @@ where id = @id;";
         return SqlQueryResult.UnknownError;
     }
 
+    public async Task<List<KnowledgeArticle>> ListAllActiveAsync(CancellationToken cancellationToken = default)
+    {
+        using SqlConnection sqlConnection = new(_appSettings.ConnectionStrings.EnquirySort);
+
+        // lang=sql
+        const string sql = @"
+select id, Title, Slug, Content, InsertDateUtc, UpdatedDateUtc, Deleted, ConcurrencyKey
+from tblKnowledgeArticles
+where Deleted = 0
+order by Title";
+
+        CommandDefinition cmd = new(sql, cancellationToken: cancellationToken);
+        return (await sqlConnection.QueryAsync<KnowledgeArticle>(cmd)).AsList();
+    }
+
     public async Task<List<KnowledgeArticle>> SearchAsync(
         string query,
         int topK = 3,

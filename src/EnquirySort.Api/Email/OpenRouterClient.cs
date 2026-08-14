@@ -76,6 +76,71 @@ public sealed class OpenRouterClient
         return result;
     }
 
+    public async Task<List<KnowledgeArticle>> SelectRelevantKnowledgeAsync(
+        InboundEmail message,
+        string? question,
+        IReadOnlyList<KnowledgeArticle> catalog,
+        int topK = 3,
+        CancellationToken cancellationToken = default)
+    {
+        if (catalog.Count == 0)
+        {
+            return [];
+        }
+
+        if (catalog.Count <= topK)
+        {
+            // Small knowledge bases: let drafting see everything.
+            return catalog.ToList();
+        }
+
+        string catalogBlock = string.Join("\n\n", catalog.Select(a =>
+            $"- id: {a.id}\n  title: {a.Title}\n  slug: {a.Slug}\n  summary: {Truncate(a.Content, 280)}"));
+
+        string system = """
+            You select knowledge-base articles that can answer a customer email.
+            Return ONLY valid JSON:
+            {
+              "article_ids": ["guid", "..."],
+              "reason": string
+            }
+            Pick at most the requested number of articles. Prefer precise how-to matches.
+            If nothing is relevant, return an empty article_ids array.
+            Only use ids from the catalog.
+            """;
+
+        string user =
+            $"Select up to {topK} articles.\n\n" +
+            $"Customer question summary: {question ?? message.Subject}\n\n" +
+            $"Original email:\nFrom: {message.FromAddress}\nSubject: {message.Subject}\n" +
+            $"Body:\n{Truncate(message.BodyText, 4000)}\n\n" +
+            $"Knowledge catalog:\n{catalogBlock}";
+
+        string content = await ChatAsync(system, user, 0.0, cancellationToken);
+        KnowledgeSelectDto? dto = ParseJson<KnowledgeSelectDto>(content);
+        List<Guid> selectedIds = (dto?.ArticleIds ?? [])
+            .Select(ParseGuid)
+            .Where(id => id.HasValue)
+            .Select(id => id!.Value)
+            .Distinct()
+            .Take(topK)
+            .ToList();
+
+        List<KnowledgeArticle> selected = selectedIds
+            .Select(id => catalog.FirstOrDefault(a => a.id == id))
+            .Where(a => a is not null)
+            .Cast<KnowledgeArticle>()
+            .ToList();
+
+        _logger.LogInformation(
+            "AI knowledge select reason={Reason} selected={Count}/{Catalog}",
+            dto?.Reason ?? "(none)",
+            selected.Count,
+            catalog.Count);
+
+        return selected;
+    }
+
     public async Task<string> DraftReplyAsync(
         InboundEmail message,
         IReadOnlyList<KnowledgeArticle> snippets,
@@ -182,6 +247,11 @@ public sealed class OpenRouterClient
         return value[..max];
     }
 
+    private static Guid? ParseGuid(string? value)
+    {
+        return Guid.TryParse(value, out Guid id) ? id : null;
+    }
+
     private sealed class ClassificationDto
     {
         [JsonPropertyName("action")]
@@ -198,5 +268,14 @@ public sealed class OpenRouterClient
 
         [JsonPropertyName("customer_question")]
         public string? CustomerQuestion { get; set; }
+    }
+
+    private sealed class KnowledgeSelectDto
+    {
+        [JsonPropertyName("article_ids")]
+        public List<string>? ArticleIds { get; set; }
+
+        [JsonPropertyName("reason")]
+        public string? Reason { get; set; }
     }
 }
