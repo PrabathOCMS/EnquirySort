@@ -78,9 +78,24 @@ public sealed class EnquiryPipeline
             string query = classification.CustomerQuestion ?? $"{message.Subject}\n{message.BodyText}";
             List<KnowledgeArticle> snippets = await _knowledgeArticles.SearchAsync(query, 3, cancellationToken);
             string reply = await _openRouter.DraftReplyAsync(message, snippets, classification.CustomerQuestion, cancellationToken);
-            await _mail.SendReplyAsync(message, reply, cancellationToken);
             enquiry.ReplyBody = reply;
-            enquiry.ReplySent = !_settings.Mail.DryRun;
+
+            if (_settings.EnquiryWorker.ResponseMode == ResponseMode.Automatic)
+            {
+                await _mail.SendReplyAsync(message, reply, cancellationToken);
+                enquiry.ReplySent = !_settings.Mail.DryRun;
+                enquiry.ReplyStatus = enquiry.ReplySent ? ReplyStatus.Sent : ReplyStatus.Draft;
+                if (_settings.Mail.DryRun)
+                {
+                    enquiry.Reason = AppendReason(enquiry.Reason, "auto-reply drafted but DryRun=true (not sent)");
+                }
+            }
+            else
+            {
+                enquiry.ReplySent = false;
+                enquiry.ReplyStatus = ReplyStatus.Draft;
+                enquiry.Reason = AppendReason(enquiry.Reason, "draft reply awaiting approval");
+            }
         }
         else if (classification.Action == EnquiryAction.Route)
         {
@@ -90,17 +105,33 @@ public sealed class EnquiryPipeline
                 await _mail.ForwardToListAsync(message, target.Address, classification.Reason, cancellationToken);
                 enquiry.RoutedToMailingListId = target.id;
                 enquiry.RoutedToMailingListName = target.Name;
+                enquiry.ReplyStatus = ReplyStatus.None;
             }
             else
             {
                 enquiry.Action = EnquiryAction.Ignore;
                 enquiry.Reason = "Route requested but no mailing lists configured";
+                enquiry.ReplyStatus = ReplyStatus.None;
             }
+        }
+        else
+        {
+            enquiry.ReplyStatus = ReplyStatus.None;
         }
 
         await _mail.MarkProcessedAsync(message.Uid, cancellationToken);
         Enquiry saved = await _enquiries.CreateEnquiryAsync(enquiry);
         return saved;
+    }
+
+    private static string AppendReason(string? reason, string suffix)
+    {
+        if (string.IsNullOrWhiteSpace(reason))
+        {
+            return suffix;
+        }
+
+        return $"{reason} ({suffix})";
     }
 
     private ClassificationResult ApplyThresholds(ClassificationResult classification, List<MailingList> lists)

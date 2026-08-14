@@ -17,6 +17,7 @@ public sealed class Enquiry
     public string? RoutedToMailingListName { get; set; }
     public string? ReplyBody { get; set; }
     public bool ReplySent { get; set; }
+    public ReplyStatus ReplyStatus { get; set; }
     public DateTime ProcessedUtc { get; set; }
     public DateTime InsertDateUtc { get; set; }
     public DateTime UpdatedDateUtc { get; set; }

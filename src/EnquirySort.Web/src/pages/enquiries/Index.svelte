@@ -3,6 +3,7 @@
   import { getApiUrl } from "../../helpers/api";
   import {
     enquiryActionLabel,
+    replyStatusLabel,
     SORT,
     type SortOrder,
     type SortValue,
@@ -26,6 +27,7 @@
     subject: string;
     action: number | string;
     confidence: number;
+    replyStatus?: number | string | null;
     routedToMailingListName?: string | null;
     processedUtc: string;
     insertDateUtc: string;
@@ -256,6 +258,17 @@
     return "ignore";
   }
 
+  function replyStatusClass(status: number | string | null | undefined): string {
+    const label = replyStatusLabel(status).toLowerCase();
+    if (label === "draft") {
+      return "draft";
+    }
+    if (label === "sent") {
+      return "sent";
+    }
+    return "none";
+  }
+
   onMount(() => {
     restoreFromQuery(query);
     lastQueryKey = query.toString();
@@ -289,7 +302,7 @@
   <div class="page-heading">
     <div>
       <h1>Enquiries</h1>
-      <p>Processed inbox messages and the actions EnquirySort took.</p>
+      <p>Processed inbox tickets — open a draft to edit and approve the reply.</p>
     </div>
     <button type="button" class="btn btn-primary" disabled={processBusy} onclick={processInbox}>
       {processBusy ? "Processing…" : "Process inbox"}
@@ -341,6 +354,7 @@
             From
           </th>
           <th>Action</th>
+          <th>Reply</th>
           <th>Confidence</th>
           <th>Routed to</th>
           <th
@@ -359,15 +373,20 @@
       </thead>
       <tbody>
         {#if loading}
-          <tr><td colspan="7" class="empty">Loading…</td></tr>
+          <tr><td colspan="8" class="empty">Loading…</td></tr>
         {:else if records.length === 0}
-          <tr><td colspan="7" class="empty">No enquiries found.</td></tr>
+          <tr><td colspan="8" class="empty">No enquiries found.</td></tr>
         {:else}
           {#each records as row (row.id)}
             <tr>
               <td><a href={href(`/enquiries/${row.id}`)}>{row.subject || "(no subject)"}</a></td>
               <td>{row.fromAddress}</td>
               <td><span class={"badge " + actionClass(row.action)}>{enquiryActionLabel(row.action)}</span></td>
+              <td>
+                <span class={"badge " + replyStatusClass(row.replyStatus)}
+                  >{replyStatusLabel(row.replyStatus)}</span
+                >
+              </td>
               <td>{typeof row.confidence === "number" ? row.confidence.toFixed(2) : row.confidence}</td>
               <td>{row.routedToMailingListName || "—"}</td>
               <td>{formatDate(row.processedUtc)}</td>

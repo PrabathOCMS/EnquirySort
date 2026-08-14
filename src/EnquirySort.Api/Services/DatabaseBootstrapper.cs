@@ -29,12 +29,6 @@ public sealed class DatabaseBootstrapper
 
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        if (!_settings.Seed.Enabled)
-        {
-            _logger.LogInformation("Database seed/bootstrap disabled (Seed:Enabled=false)");
-            return;
-        }
-
         string connectionString = _settings.ConnectionStrings.EnquirySort;
         if (string.IsNullOrWhiteSpace(connectionString))
         {
@@ -43,6 +37,14 @@ public sealed class DatabaseBootstrapper
 
         await EnsureDatabaseExistsAsync(connectionString, cancellationToken);
         await EnsureSchemaAsync(connectionString, cancellationToken);
+        await EnsureMigrationsAsync(connectionString, cancellationToken);
+
+        if (!_settings.Seed.Enabled)
+        {
+            _logger.LogInformation("Database seed disabled (Seed:Enabled=false)");
+            return;
+        }
+
         await SeedAsync(connectionString, cancellationToken);
     }
 
@@ -84,32 +86,61 @@ public sealed class DatabaseBootstrapper
 
         if (tablesExist)
         {
-            _logger.LogInformation("Schema already present; skipping DDL");
+            _logger.LogInformation("Schema already present; skipping initial DDL");
             return;
         }
 
-        string schemaPath = ResolveSchemaPath();
-        string script = await File.ReadAllTextAsync(schemaPath, cancellationToken);
-        IEnumerable<string> batches = SplitSqlBatches(script);
+        string schemaPath = ResolveSqlPath("001_InitialSchema.sql");
+        await ExecuteSqlScriptAsync(connection, schemaPath, skipCreateDbAndSeed: true, cancellationToken);
+        _logger.LogInformation("Applied EnquirySort schema from {Path}", schemaPath);
+    }
 
-        foreach (string batch in batches)
+    private async Task EnsureMigrationsAsync(string connectionString, CancellationToken cancellationToken)
+    {
+        await using SqlConnection connection = new(connectionString);
+        await connection.OpenAsync(cancellationToken);
+
+        bool hasReplyStatus = await connection.ExecuteScalarAsync<int>(
+            new CommandDefinition(
+                """
+                select case when col_length(N'dbo.tblEnquiries', N'ReplyStatus') is null then 0 else 1 end
+                """,
+                cancellationToken: cancellationToken)) == 1;
+
+        if (hasReplyStatus)
+        {
+            _logger.LogInformation("Migration 002_ReplyStatus already applied");
+            return;
+        }
+
+        string migrationPath = ResolveSqlPath("002_ReplyStatus.sql");
+        await ExecuteSqlScriptAsync(connection, migrationPath, skipCreateDbAndSeed: false, cancellationToken);
+        _logger.LogInformation("Applied migration {Path}", migrationPath);
+    }
+
+    private async Task ExecuteSqlScriptAsync(
+        SqlConnection connection,
+        string scriptPath,
+        bool skipCreateDbAndSeed,
+        CancellationToken cancellationToken)
+    {
+        string script = await File.ReadAllTextAsync(scriptPath, cancellationToken);
+        foreach (string batch in SplitSqlBatches(script))
         {
             if (string.IsNullOrWhiteSpace(batch))
             {
                 continue;
             }
 
-            // Skip create-database / use / seed inserts — bootstrap owns DB selection and runtime seeding.
-            if (Regex.IsMatch(batch, @"^\s*(create\s+database|use)\b", RegexOptions.IgnoreCase | RegexOptions.Multiline)
-                || Regex.IsMatch(batch, @"^\s*insert\s+into\s+tbl", RegexOptions.IgnoreCase | RegexOptions.Multiline))
+            if (skipCreateDbAndSeed
+                && (Regex.IsMatch(batch, @"^\s*(create\s+database|use)\b", RegexOptions.IgnoreCase | RegexOptions.Multiline)
+                    || Regex.IsMatch(batch, @"^\s*insert\s+into\s+tbl", RegexOptions.IgnoreCase | RegexOptions.Multiline)))
             {
                 continue;
             }
 
             await connection.ExecuteAsync(new CommandDefinition(batch, cancellationToken: cancellationToken));
         }
-
-        _logger.LogInformation("Applied EnquirySort schema from {Path}", schemaPath);
     }
 
     private async Task SeedAsync(string connectionString, CancellationToken cancellationToken)
@@ -238,16 +269,16 @@ public sealed class DatabaseBootstrapper
 
             insert into tblEnquiries
                 (id, MessageId, FromAddress, Subject, BodyText, Action, Confidence, Reason, CustomerQuestion,
-                 RoutedToMailingListId, ReplyBody, ReplySent, ProcessedUtc, InsertDateUtc, UpdatedDateUtc)
+                 RoutedToMailingListId, ReplyBody, ReplySent, ReplyStatus, ProcessedUtc, InsertDateUtc, UpdatedDateUtc)
             values
                 (@respondId, N'<demo-password@example.com>', N'customer@example.org', N'Need password reset help',
                  N'How do I reset my password?', @respondAction, 0.91, N'FAQ password reset',
                  N'How do I reset my password?', null,
                  N'Please visit https://app.oraclecms.com/forgot-password and follow the reset link.',
-                 0, @_now, @_now, @_now),
+                 0, @draftStatus, @_now, @_now, @_now),
                 (@routeId, N'<demo-sales@example.com>', N'buyer@acmecorp.com', N'Enterprise pricing for 40 sites + SSO',
                  N'We need SSO and a formal quote for procurement.', @routeAction, 0.94, N'Enterprise quote request',
-                 null, @salesListId, null, 0, @_now, @_now, @_now);
+                 null, @salesListId, null, 0, @noneStatus, @_now, @_now, @_now);
             """;
 
         DynamicParameters parameters = new();
@@ -256,16 +287,18 @@ public sealed class DatabaseBootstrapper
         parameters.Add("@salesListId", salesListId, DbType.Guid);
         parameters.Add("@respondAction", (byte)EnquiryAction.Respond, DbType.Byte);
         parameters.Add("@routeAction", (byte)EnquiryAction.Route, DbType.Byte);
+        parameters.Add("@draftStatus", (byte)ReplyStatus.Draft, DbType.Byte);
+        parameters.Add("@noneStatus", (byte)ReplyStatus.None, DbType.Byte);
         await connection.ExecuteAsync(new CommandDefinition(sql, parameters, cancellationToken: cancellationToken));
     }
 
-    private string ResolveSchemaPath()
+    private string ResolveSqlPath(string fileName)
     {
         string[] candidates =
         [
-            Path.GetFullPath(Path.Combine(_environment.ContentRootPath, "..", "..", "database", "001_InitialSchema.sql")),
-            Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "database", "001_InitialSchema.sql")),
-            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "database", "001_InitialSchema.sql"))
+            Path.GetFullPath(Path.Combine(_environment.ContentRootPath, "..", "..", "database", fileName)),
+            Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "database", fileName)),
+            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "database", fileName))
         ];
 
         foreach (string candidate in candidates)
@@ -277,7 +310,7 @@ public sealed class DatabaseBootstrapper
         }
 
         throw new FileNotFoundException(
-            "Could not find database/001_InitialSchema.sql. Run from the repo root or copy the file next to the API.");
+            $"Could not find database/{fileName}. Run from the repo root or copy the file next to the API.");
     }
 
     private static IEnumerable<string> SplitSqlBatches(string script)

@@ -142,6 +142,8 @@ create table tblEnquiries
     ReplyBody                   nvarchar(max) null,
     ReplySent                   bit not null
                                     constraint DF_tblEnquiries_ReplySent default (0),
+    ReplyStatus                 tinyint not null
+                                    constraint DF_tblEnquiries_ReplyStatus default (0),
     ProcessedUtc                datetime2(3) not null,
     InsertDateUtc               datetime2(3) not null
                                     constraint DF_tblEnquiries_InsertDateUtc default (sysutcdatetime()),
@@ -149,7 +151,7 @@ create table tblEnquiries
                                     constraint DF_tblEnquiries_UpdatedDateUtc default (sysutcdatetime()),
     Deleted                     bit not null
                                     constraint DF_tblEnquiries_Deleted default (0),
-    ConcurrencyKey              as convert(varbinary(4), binary_checksum(FromAddress, Subject, Action, ReplySent))
+    ConcurrencyKey              as convert(varbinary(4), binary_checksum(FromAddress, Subject, Action, ReplyBody, ReplySent, ReplyStatus))
                                     persisted not null
 );
 go
@@ -179,11 +181,13 @@ create table tblEnquiries_Log
     Subject                 nvarchar(500) null,
     Action                  tinyint null,
     ReplySent               bit null,
+    ReplyStatus             tinyint null,
     Deleted                 bit null,
     OldFromAddress          nvarchar(320) null,
     OldSubject              nvarchar(500) null,
     OldAction               tinyint null,
     OldReplySent            bit null,
+    OldReplyStatus          tinyint null,
     OldDeleted              bit null,
     LogAction               varchar(6) not null,
     CascadeFrom             varchar(128) null,

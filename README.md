@@ -13,8 +13,28 @@ On startup the API **creates the database/schema if needed** and **seeds demo da
 Inbox (IMAP) → OpenRouter → respond | route | ignore
                   │              │
                   ▼              ▼
-           Knowledge reply   Mailing list forward
+     Draft or auto-send     Mailing list forward
+                  │
+                  ▼
+        Human approve & send (Draft mode)
 ```
+
+## Response modes
+
+Configure under `EnquiryWorker:ResponseMode`:
+
+| Mode | Behaviour |
+|------|-----------|
+| **`Draft`** (default) | AI writes a reply and saves it on the enquiry ticket. Edit in the admin UI, then **Approve & send**. |
+| **`Automatic`** | AI reply is sent immediately after classification (still subject to `Mail:DryRun`). |
+
+```json
+"EnquiryWorker": {
+  "ResponseMode": "Draft"
+}
+```
+
+In Draft mode, open an enquiry with reply status **Draft**, edit the body, **Save draft**, then **Approve & send**. Sending requires `Mail:DryRun` set to `false` and valid SMTP credentials.
 
 ## Quick setup
 
@@ -122,7 +142,7 @@ When tables are empty and `Seed:Enabled=true`:
 |-------|-----------|
 | Mailing lists | `sales`, `support`, `billing` |
 | Knowledge articles | password reset, pricing, custom domains, getting started |
-| Enquiries | sample **Respond** (password FAQ) + **Route** (enterprise quote → sales) |
+| Enquiries | sample **Respond** (password FAQ, **Draft** reply) + **Route** (enterprise quote → sales) |
 
 Turn seeding off in production:
 
@@ -136,9 +156,10 @@ If you prefer applying DDL yourself:
 
 ```bash
 sqlcmd -S localhost,1433 -U sa -P 'EnquirySort_Demo1!' -C -i database/001_InitialSchema.sql
+sqlcmd -S localhost,1433 -U sa -P 'EnquirySort_Demo1!' -C -i database/002_ReplyStatus.sql
 ```
 
-Runtime seed still fills empty tables when the API starts.
+On API startup, migration `002_ReplyStatus.sql` is applied automatically when `ReplyStatus` is missing. Runtime seed still fills empty tables when enabled.
 
 ## Project layout
 
@@ -147,6 +168,7 @@ Runtime seed still fills empty tables when the API starts.
 | `src/EnquirySort.Api` | API + inbox worker + runtime bootstrap/seed |
 | `src/EnquirySort.Web` | Svelte admin |
 | `database/001_InitialSchema.sql` | SQL Server DDL |
+| `database/002_ReplyStatus.sql` | Draft/sent reply status migration |
 | `docker-compose.yml` | Local SQL Server |
 
 ## Skills

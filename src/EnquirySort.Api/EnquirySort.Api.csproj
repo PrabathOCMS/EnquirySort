@@ -19,6 +19,9 @@
     <None Include="..\..\database\001_InitialSchema.sql"
           Link="database\001_InitialSchema.sql"
           CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\database\002_ReplyStatus.sql"
+          Link="database\002_ReplyStatus.sql"
+          CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
