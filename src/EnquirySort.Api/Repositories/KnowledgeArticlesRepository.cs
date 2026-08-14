@@ -1,4 +1,6 @@
 using System.Data;
+using System.Text;
+using System.Text.RegularExpressions;
 using Dapper;
 using EnquirySort.Api.Configuration;
 using EnquirySort.Api.Enums;
@@ -430,34 +432,104 @@ where id = @id;";
         return SqlQueryResult.UnknownError;
     }
 
+    public async Task<List<KnowledgeArticle>> ListAllActiveAsync(CancellationToken cancellationToken = default)
+    {
+        using SqlConnection sqlConnection = new(_appSettings.ConnectionStrings.EnquirySort);
+
+        // lang=sql
+        const string sql = @"
+select id, Title, Slug, Content, InsertDateUtc, UpdatedDateUtc, Deleted, ConcurrencyKey
+from tblKnowledgeArticles
+where Deleted = 0
+order by Title";
+
+        CommandDefinition cmd = new(sql, cancellationToken: cancellationToken);
+        return (await sqlConnection.QueryAsync<KnowledgeArticle>(cmd)).AsList();
+    }
+
     public async Task<List<KnowledgeArticle>> SearchAsync(
         string query,
         int topK = 3,
         CancellationToken cancellationToken = default)
     {
         using SqlConnection sqlConnection = new(_appSettings.ConnectionStrings.EnquirySort);
-        string? search = string.IsNullOrWhiteSpace(query) ? null : query.Trim();
+        List<string> keywords = ExtractSearchKeywords(query);
 
-        // lang=sql
-        string sql = @"
-select top (@topK)
-    id, Title, Slug, Content, InsertDateUtc, UpdatedDateUtc, Deleted, ConcurrencyKey
-from tblKnowledgeArticles
-where Deleted = 0
-  and (
-        @search is null
-        or Title like '%' + @search + '%'
-        or Slug like '%' + @search + '%'
-        or Content like '%' + @search + '%'
-      )
-order by
-    case when Title like '%' + @search + '%' then 0 else 1 end,
-    UpdatedDateUtc desc";
+        if (keywords.Count == 0)
+        {
+            return [];
+        }
 
+        // Score articles by how many query keywords hit title/slug/content.
+        // Full-phrase LIKE fails for questions like "How do I reset my password?"
+        // against an article titled "Resetting Your Password".
+        StringBuilder scoreBuilder = new();
+        StringBuilder whereBuilder = new();
         DynamicParameters parameters = new();
         parameters.Add("@topK", topK, DbType.Int32);
-        parameters.Add("@search", search, DbType.String, size: 200);
+
+        for (int i = 0; i < keywords.Count; i++)
+        {
+            string paramName = $"@kw{i}";
+            parameters.Add(paramName, keywords[i], DbType.String, size: 100);
+
+            if (i > 0)
+            {
+                scoreBuilder.Append(" + ");
+                whereBuilder.Append(" or ");
+            }
+
+            scoreBuilder.Append($@"
+                (case
+                    when Title like '%' + {paramName} + '%' then 3
+                    when Slug like '%' + {paramName} + '%' then 2
+                    when Content like '%' + {paramName} + '%' then 1
+                    else 0
+                 end)");
+
+            whereBuilder.Append($@"
+                Title like '%' + {paramName} + '%'
+                or Slug like '%' + {paramName} + '%'
+                or Content like '%' + {paramName} + '%'");
+        }
+
+        // lang=sql
+        string sql = $@"
+select top (@topK)
+    id, Title, Slug, Content, InsertDateUtc, UpdatedDateUtc, Deleted, ConcurrencyKey,
+    ({scoreBuilder}) as SearchScore
+from tblKnowledgeArticles
+where Deleted = 0
+  and ({whereBuilder})
+order by SearchScore desc, UpdatedDateUtc desc";
+
         CommandDefinition cmd = new(sql, parameters, cancellationToken: cancellationToken);
         return (await sqlConnection.QueryAsync<KnowledgeArticle>(cmd)).AsList();
+    }
+
+    internal static List<string> ExtractSearchKeywords(string? query)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return [];
+        }
+
+        HashSet<string> stopWords = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "a", "an", "the", "and", "or", "but", "if", "then", "so", "to", "of", "in", "on", "at",
+            "for", "from", "with", "about", "into", "over", "after", "is", "are", "was", "were",
+            "be", "been", "being", "am", "do", "does", "did", "can", "could", "should", "would",
+            "will", "just", "please", "help", "need", "needed", "want", "how", "what", "when",
+            "where", "why", "who", "whom", "which", "my", "our", "your", "their", "his", "her",
+            "its", "me", "we", "you", "they", "i", "it", "this", "that", "these", "those",
+            "hi", "hello", "hey", "thanks", "thank", "regards"
+        };
+
+        return Regex.Matches(query, @"[A-Za-z0-9][A-Za-z0-9\-]{1,}")
+            .Select(m => m.Value.ToLowerInvariant())
+            .Where(token => token.Length >= 3 && !stopWords.Contains(token))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Take(8)
+            .ToList();
     }
 }

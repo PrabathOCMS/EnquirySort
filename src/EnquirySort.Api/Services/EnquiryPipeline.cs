@@ -79,8 +79,34 @@ public sealed class EnquiryPipeline
         if (classification.Action == EnquiryAction.Respond)
         {
             string query = classification.CustomerQuestion ?? $"{message.Subject}\n{message.BodyText}";
-            List<KnowledgeArticle> snippets = await _knowledgeArticles.SearchAsync(query, 3, cancellationToken);
-            string reply = await _openRouter.DraftReplyAsync(message, snippets, classification.CustomerQuestion, cancellationToken);
+            List<KnowledgeArticle> catalog = await _knowledgeArticles.ListAllActiveAsync(cancellationToken);
+            List<KnowledgeArticle> snippets = await _openRouter.SelectRelevantKnowledgeAsync(
+                message,
+                classification.CustomerQuestion,
+                catalog,
+                topK: 3,
+                cancellationToken);
+
+            // Fallback if the model returned nothing usable (or catalog was large and selection failed).
+            if (snippets.Count == 0 && catalog.Count > 0)
+            {
+                snippets = await _knowledgeArticles.SearchAsync(query, 3, cancellationToken);
+                _logger.LogInformation(
+                    "AI knowledge select returned 0; keyword fallback matched {Count} article(s)",
+                    snippets.Count);
+            }
+
+            _logger.LogInformation(
+                "Knowledge for reply: {Count} article(s) from catalog of {Catalog} for query={Query}",
+                snippets.Count,
+                catalog.Count,
+                TruncateForLog(query, 120));
+
+            string reply = await _openRouter.DraftReplyAsync(
+                message,
+                snippets,
+                classification.CustomerQuestion,
+                cancellationToken);
             enquiry.ReplyBody = reply;
 
             Models.AppSetting runtime = await _runtimeSettings.GetAsync(cancellationToken);
@@ -138,6 +164,16 @@ public sealed class EnquiryPipeline
         }
 
         return $"{reason} ({suffix})";
+    }
+
+    private static string TruncateForLog(string value, int max)
+    {
+        if (string.IsNullOrEmpty(value) || value.Length <= max)
+        {
+            return value;
+        }
+
+        return value[..max] + "…";
     }
 
     private ClassificationResult ApplyThresholds(ClassificationResult classification, List<MailingList> lists)
