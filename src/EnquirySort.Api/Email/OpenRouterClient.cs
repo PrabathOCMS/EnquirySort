@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using EnquirySort.Api.Configuration;
 using EnquirySort.Api.Enums;
 using EnquirySort.Api.Models;
@@ -158,7 +159,10 @@ public sealed class OpenRouterClient
             Do not invent product URLs, policies, or steps that are not in the excerpts.
             If no useful excerpts are provided, say you could not find matching documentation and
             that a human will follow up — do not guess a generic how-to.
-            Plain text only. Sign off as EnquirySort Support.
+            Plain text only.
+            Do NOT include any sign-off, closing, or signature (no "Best regards", "Kind regards",
+            "Sincerely", "Thanks", "EnquirySort Support", name blocks, or similar). The email
+            signature is appended separately by the system.
             """;
 
         string user =
@@ -166,7 +170,8 @@ public sealed class OpenRouterClient
             $"Original email:\nFrom: {message.FromAddress}\nSubject: {message.Subject}\nBody:\n{Truncate(message.BodyText, 6000)}\n\n" +
             $"Knowledge base excerpts:\n{kbBlock}";
 
-        return (await ChatAsync(system, user, 0.3, cancellationToken)).Trim();
+        string draft = (await ChatAsync(system, user, 0.3, cancellationToken)).Trim();
+        return StripTrailingSignOff(draft);
     }
 
     private async Task<string> ChatAsync(string system, string user, double temperature, CancellationToken cancellationToken)
@@ -245,6 +250,37 @@ public sealed class OpenRouterClient
         }
 
         return value[..max];
+    }
+
+    /// <summary>
+    /// Removes common trailing closings the model may still add; signature is appended separately.
+    /// </summary>
+    internal static string StripTrailingSignOff(string draft)
+    {
+        if (string.IsNullOrWhiteSpace(draft))
+        {
+            return draft;
+        }
+
+        string text = draft.TrimEnd();
+        // Match a closing phrase near the end, optionally followed by 1–3 short signature lines.
+        Match match = Regex.Match(
+            text,
+            """
+            (?:\r?\n|\r)[ \t]*
+            (?:best(?:\s+regards)?|kind\s+regards|warm\s+regards|regards|sincerely|yours\s+(?:sincerely|faithfully)|thanks(?:\s+again)?|thank\s+you|cheers)
+            \s*[,!]?\s*
+            (?:(?:\r?\n|\r)[ \t]*[^\r\n]{0,80}){0,3}
+            \s*\z
+            """,
+            RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
+
+        if (!match.Success)
+        {
+            return text;
+        }
+
+        return text[..match.Index].TrimEnd();
     }
 
     private static Guid? ParseGuid(string? value)
