@@ -2,9 +2,13 @@
   import { onDestroy, onMount } from "svelte";
   import { getApiUrl } from "../../helpers/api";
   import {
+    ENQUIRY_FILTER,
+    ENQUIRY_FILTER_OPTIONS,
     enquiryActionLabel,
+    parseEnquiryFilter,
     replyStatusLabel,
     SORT,
+    type EnquiryFilterValue,
     type SortOrder,
     type SortValue,
   } from "../../helpers/constants";
@@ -46,6 +50,7 @@
   let pageSize = $state(30);
   let search = $state("");
   let searchDraft = $state("");
+  let filter = $state<EnquiryFilterValue>(ENQUIRY_FILTER.OPEN);
   let sortValue = $state<SortValue>(SORT.UPDATED);
   let sortOrder = $state<SortOrder>("desc");
   let requestCounter = $state(0);
@@ -69,6 +74,7 @@
 
     search = params.get("search") ?? "";
     searchDraft = search;
+    filter = parseEnquiryFilter(params.get("filter"));
 
     const sort = (params.get("sort") ?? SORT.UPDATED) as SortValue;
     applySort(sort, false);
@@ -80,6 +86,7 @@
     params.set("pageSize", String(pageSize));
     params.set("sort", sortValue);
     params.set("sortOrder", sortOrder);
+    params.set("filter", filter);
     if (search) {
       params.set("search", search);
     }
@@ -142,6 +149,7 @@
       params.set("pageNumber", String(pageNumber));
       params.set("pageSize", String(pageSize));
       params.set("sort", sortValue);
+      params.set("filter", filter);
       if (search) {
         params.set("search", search);
       }
@@ -195,6 +203,15 @@
 
   function submitSearch(): void {
     search = searchDraft.trim();
+    pageNumber = 1;
+    syncUrl();
+  }
+
+  function setFilter(next: EnquiryFilterValue): void {
+    if (filter === next) {
+      return;
+    }
+    filter = next;
     pageNumber = 1;
     syncUrl();
   }
@@ -296,13 +313,22 @@
   });
 
   const totalPages = $derived(Math.max(1, Math.ceil(totalCount / pageSize) || 1));
+  const filterHelp = $derived(
+    ENQUIRY_FILTER_OPTIONS.find((option) => option.value === filter)?.help
+      ?? "Processed inbox tickets.",
+  );
+  const emptyMessage = $derived(
+    filter === ENQUIRY_FILTER.OPEN
+      ? "No open tickets. Process the inbox or switch filters to see history."
+      : "No enquiries found for this filter.",
+  );
 </script>
 
 <div class="page-card">
   <div class="page-heading">
     <div>
       <h1>Enquiries</h1>
-      <p>Processed inbox tickets — open a draft to edit and approve the reply.</p>
+      <p>{filterHelp}</p>
     </div>
     <button type="button" class="btn btn-primary" disabled={processBusy} onclick={processInbox}>
       {processBusy ? "Processing…" : "Process inbox"}
@@ -315,6 +341,21 @@
   {#if processError}
     <div class="alert alert-error">{processError}</div>
   {/if}
+
+  <div class="filter-tabs" role="tablist" aria-label="Enquiry filters">
+    {#each ENQUIRY_FILTER_OPTIONS as option (option.value)}
+      <button
+        type="button"
+        role="tab"
+        class="filter-tab"
+        class:active={filter === option.value}
+        aria-selected={filter === option.value}
+        onclick={() => setFilter(option.value)}
+      >
+        {option.label}
+      </button>
+    {/each}
+  </div>
 
   <div class="toolbar">
     <input
@@ -375,7 +416,7 @@
         {#if loading}
           <tr><td colspan="8" class="empty">Loading…</td></tr>
         {:else if records.length === 0}
-          <tr><td colspan="8" class="empty">No enquiries found.</td></tr>
+          <tr><td colspan="8" class="empty">{emptyMessage}</td></tr>
         {:else}
           {#each records as row (row.id)}
             <tr>
@@ -406,3 +447,30 @@
     </div>
   </div>
 </div>
+
+<style>
+  .filter-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .filter-tab {
+    border: 1px solid color-mix(in srgb, CanvasText 16%, transparent);
+    background: color-mix(in srgb, CanvasText 3%, Canvas);
+    color: inherit;
+    border-radius: 999px;
+    padding: 0.4rem 0.85rem;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .filter-tab.active {
+    border-color: color-mix(in srgb, #1f6f78 55%, transparent);
+    background: color-mix(in srgb, #1f6f78 12%, Canvas);
+    color: #16555c;
+  }
+</style>

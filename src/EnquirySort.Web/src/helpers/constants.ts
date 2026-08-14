@@ -32,6 +32,37 @@ export const RESPONSE_MODE_LABELS: Record<number, string> = {
   [RESPONSE_MODE.DRAFT]: "Draft",
 };
 
+export const ENQUIRY_FILTER = {
+  OPEN: "open",
+  RESPONDED: "responded",
+  IGNORED: "ignored",
+  ROUTED: "routed",
+  ALL: "all",
+} as const;
+
+export type EnquiryFilterValue = (typeof ENQUIRY_FILTER)[keyof typeof ENQUIRY_FILTER];
+
+export const ENQUIRY_FILTER_OPTIONS: { value: EnquiryFilterValue; label: string; help: string }[] = [
+  { value: ENQUIRY_FILTER.OPEN, label: "Open", help: "Draft replies waiting for review" },
+  { value: ENQUIRY_FILTER.RESPONDED, label: "Responded", help: "Replies already sent" },
+  { value: ENQUIRY_FILTER.IGNORED, label: "Ignored", help: "Marked ignore by the classifier" },
+  { value: ENQUIRY_FILTER.ROUTED, label: "Routed", help: "Forwarded to a mailing list" },
+  { value: ENQUIRY_FILTER.ALL, label: "All", help: "Every processed enquiry" },
+];
+
+export function parseEnquiryFilter(value: string | null | undefined): EnquiryFilterValue {
+  const normalized = (value ?? "").trim().toLowerCase();
+  if (
+    normalized === ENQUIRY_FILTER.RESPONDED
+    || normalized === ENQUIRY_FILTER.IGNORED
+    || normalized === ENQUIRY_FILTER.ROUTED
+    || normalized === ENQUIRY_FILTER.ALL
+  ) {
+    return normalized;
+  }
+  return ENQUIRY_FILTER.OPEN;
+}
+
 export const SORT = {
   UNSORTED: "unsorted",
   UPDATED: "updated",

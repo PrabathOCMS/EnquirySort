@@ -36,6 +36,8 @@ Configure under `EnquiryWorker:ResponseMode`:
 
 In Draft mode, open an enquiry with reply status **Draft**, edit the body, **Save draft**, then **Approve & send**. Sending requires `Mail:DryRun` set to `false` and valid SMTP credentials.
 
+The Enquiries page defaults to **Open** tickets (drafts awaiting review). Use the filter tabs for **Responded**, **Ignored**, **Routed**, or **All**.
+
 You can also change the mode (and the email signature) at runtime from **Settings** in the admin UI (`#/settings`). That value is stored in SQL and overrides `EnquiryWorker:ResponseMode` from appsettings.
 
 ## Quick setup

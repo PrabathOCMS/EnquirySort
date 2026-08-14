@@ -347,6 +347,7 @@ where @_result = 0 and id = @id;";
         SortType sort,
         long? requestCounter,
         string? search,
+        EnquiryListFilter filter,
         CancellationToken cancellationToken = default)
     {
         using SqlConnection sqlConnection = new(_appSettings.ConnectionStrings.EnquirySort);
@@ -358,6 +359,15 @@ where @_result = 0 and id = @id;";
             _ => "e.ProcessedUtc desc"
         };
 
+        string filterSql = filter switch
+        {
+            EnquiryListFilter.Open => "and e.ReplyStatus = @draftStatus",
+            EnquiryListFilter.Responded => "and e.ReplyStatus = @sentStatus",
+            EnquiryListFilter.Ignored => "and e.Action = @ignoreAction",
+            EnquiryListFilter.Routed => "and e.Action = @routeAction",
+            _ => string.Empty
+        };
+
         // lang=sql
         string sql = $@"
 declare @_search nvarchar(200) = @search;
@@ -365,6 +375,7 @@ declare @_search nvarchar(200) = @search;
 select count(*)
 from tblEnquiries e
 where e.Deleted = 0
+  {filterSql}
   and (@_search is null
        or e.Subject like '%' + @_search + '%'
        or e.FromAddress like '%' + @_search + '%'
@@ -377,6 +388,7 @@ select e.id, e.MessageId, e.FromAddress, e.Subject, e.BodyText, e.Action, e.Conf
 from tblEnquiries e
 left join tblMailingLists ml on ml.id = e.RoutedToMailingListId and ml.Deleted = 0
 where e.Deleted = 0
+  {filterSql}
   and (@_search is null
        or e.Subject like '%' + @_search + '%'
        or e.FromAddress like '%' + @_search + '%'
@@ -388,6 +400,10 @@ offset @offset rows fetch next @pageSize rows only;";
         parameters.Add("@search", string.IsNullOrWhiteSpace(search) ? null : search.Trim(), DbType.String, size: 200);
         parameters.Add("@offset", (pageNumber - 1) * pageSize, DbType.Int32);
         parameters.Add("@pageSize", pageSize, DbType.Int32);
+        parameters.Add("@draftStatus", (byte)ReplyStatus.Draft, DbType.Byte);
+        parameters.Add("@sentStatus", (byte)ReplyStatus.Sent, DbType.Byte);
+        parameters.Add("@ignoreAction", (byte)EnquiryAction.Ignore, DbType.Byte);
+        parameters.Add("@routeAction", (byte)EnquiryAction.Route, DbType.Byte);
         CommandDefinition cmd = new(sql, parameters, cancellationToken: cancellationToken);
         using SqlMapper.GridReader gridReader = await sqlConnection.QueryMultipleAsync(cmd);
         int totalCount = await gridReader.ReadFirstAsync<int>();
