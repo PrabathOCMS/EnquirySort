@@ -85,6 +85,15 @@ public sealed class ImapEmailClient
 
     public async Task SendReplyAsync(InboundEmail original, string body, CancellationToken cancellationToken = default)
     {
+        await SendReplyAsync(original, body, signatureHtml: null, cancellationToken);
+    }
+
+    public async Task SendReplyAsync(
+        InboundEmail original,
+        string body,
+        string? signatureHtml,
+        CancellationToken cancellationToken = default)
+    {
         MimeMessage message = new();
         message.From.Add(MailboxAddress.Parse(_settings.Mail.EmailAddress));
         message.To.Add(MailboxAddress.Parse(original.FromAddress));
@@ -98,7 +107,7 @@ public sealed class ImapEmailClient
             message.References.Add(original.MessageId);
         }
 
-        message.Body = new TextPart("plain") { Text = body };
+        message.Body = EmailBodyComposer.BuildReplyBody(body, signatureHtml);
         await SendAsync(message, cancellationToken);
     }
 

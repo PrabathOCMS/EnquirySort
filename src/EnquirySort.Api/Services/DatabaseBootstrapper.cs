@@ -100,20 +100,39 @@ public sealed class DatabaseBootstrapper
         await using SqlConnection connection = new(connectionString);
         await connection.OpenAsync(cancellationToken);
 
-        bool hasReplyStatus = await connection.ExecuteScalarAsync<int>(
-            new CommandDefinition(
-                """
-                select case when col_length(N'dbo.tblEnquiries', N'ReplyStatus') is null then 0 else 1 end
-                """,
-                cancellationToken: cancellationToken)) == 1;
+        await ApplyMigrationIfNeededAsync(
+            connection,
+            "002_ReplyStatus.sql",
+            """
+            select case when col_length(N'dbo.tblEnquiries', N'ReplyStatus') is null then 1 else 0 end
+            """,
+            cancellationToken);
 
-        if (hasReplyStatus)
+        await ApplyMigrationIfNeededAsync(
+            connection,
+            "003_AppSettings.sql",
+            """
+            select case when object_id(N'dbo.tblAppSettings', N'U') is null then 1 else 0 end
+            """,
+            cancellationToken);
+    }
+
+    private async Task ApplyMigrationIfNeededAsync(
+        SqlConnection connection,
+        string fileName,
+        string needsApplySql,
+        CancellationToken cancellationToken)
+    {
+        bool needsApply = await connection.ExecuteScalarAsync<int>(
+            new CommandDefinition(needsApplySql, cancellationToken: cancellationToken)) == 1;
+
+        if (!needsApply)
         {
-            _logger.LogInformation("Migration 002_ReplyStatus already applied");
+            _logger.LogInformation("Migration {File} already applied", fileName);
             return;
         }
 
-        string migrationPath = ResolveSqlPath("002_ReplyStatus.sql");
+        string migrationPath = ResolveSqlPath(fileName);
         await ExecuteSqlScriptAsync(connection, migrationPath, skipCreateDbAndSeed: false, cancellationToken);
         _logger.LogInformation("Applied migration {Path}", migrationPath);
     }

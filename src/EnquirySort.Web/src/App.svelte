@@ -11,6 +11,7 @@
   import KnowledgeArticlesUpdate from "./pages/knowledge-articles/Update.svelte";
   import EnquiriesIndex from "./pages/enquiries/Index.svelte";
   import EnquiriesDetail from "./pages/enquiries/Detail.svelte";
+  import SettingsIndex from "./pages/settings/Index.svelte";
 
   let route = $state<Route>(getRoute());
 
@@ -47,6 +48,7 @@
       <a class={navClass(["mailing-lists", "mailing-lists-create", "mailing-lists-detail", "mailing-lists-update"])} href={href("/")}>Mailing lists</a>
       <a class={navClass(["knowledge-articles", "knowledge-articles-create", "knowledge-articles-detail", "knowledge-articles-update"])} href={href("/knowledge-articles")}>Knowledge</a>
       <a class={navClass(["enquiries", "enquiries-detail"])} href={href("/enquiries")}>Enquiries</a>
+      <a class={navClass(["settings"])} href={href("/settings")}>Settings</a>
     </nav>
   </header>
 
@@ -71,6 +73,8 @@
       <EnquiriesIndex query={route.query} />
     {:else if route.name === "enquiries-detail"}
       <EnquiriesDetail id={route.id} />
+    {:else if route.name === "settings"}
+      <SettingsIndex />
     {:else}
       <div class="page-card">
         <h1>Page not found</h1>

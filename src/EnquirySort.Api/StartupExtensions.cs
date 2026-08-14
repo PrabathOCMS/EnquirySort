@@ -15,6 +15,8 @@ public static class StartupExtensions
         services.AddSingleton<MailingListsRepository>();
         services.AddSingleton<KnowledgeArticlesRepository>();
         services.AddSingleton<EnquiriesRepository>();
+        services.AddSingleton<AppSettingsRepository>();
+        services.AddSingleton<RuntimeAppSettings>();
         return services;
     }
 

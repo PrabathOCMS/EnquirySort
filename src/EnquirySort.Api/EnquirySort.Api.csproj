@@ -22,6 +22,9 @@
     <None Include="..\..\database\002_ReplyStatus.sql"
           Link="database\002_ReplyStatus.sql"
           CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\database\003_AppSettings.sql"
+          Link="database\003_AppSettings.sql"
+          CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

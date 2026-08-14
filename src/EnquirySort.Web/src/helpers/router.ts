@@ -9,6 +9,7 @@ export type Route =
   | { name: "knowledge-articles-update"; id: string }
   | { name: "enquiries"; query: URLSearchParams }
   | { name: "enquiries-detail"; id: string }
+  | { name: "settings" }
   | { name: "not-found" };
 
 function parseHash(): Route {
@@ -59,6 +60,10 @@ function parseHash(): Route {
     if (segments.length === 2) {
       return { name: "enquiries-detail", id: segments[1] };
     }
+  }
+
+  if (segments[0] === "settings" && segments.length === 1) {
+    return { name: "settings" };
   }
 
   return { name: "not-found" };

@@ -36,6 +36,8 @@ Configure under `EnquiryWorker:ResponseMode`:
 
 In Draft mode, open an enquiry with reply status **Draft**, edit the body, **Save draft**, then **Approve & send**. Sending requires `Mail:DryRun` set to `false` and valid SMTP credentials.
 
+You can also change the mode (and the email signature) at runtime from **Settings** in the admin UI (`#/settings`). That value is stored in SQL and overrides `EnquiryWorker:ResponseMode` from appsettings.
+
 ## Quick setup
 
 ### 1. Prerequisites
@@ -169,6 +171,7 @@ On API startup, migration `002_ReplyStatus.sql` is applied automatically when `R
 | `src/EnquirySort.Web` | Svelte admin |
 | `database/001_InitialSchema.sql` | SQL Server DDL |
 | `database/002_ReplyStatus.sql` | Draft/sent reply status migration |
+| `database/003_AppSettings.sql` | Runtime response mode + email signature |
 | `docker-compose.yml` | Local SQL Server |
 
 ## Skills
