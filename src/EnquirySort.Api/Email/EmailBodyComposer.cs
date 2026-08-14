@@ -52,7 +52,9 @@ public static partial class EmailBodyComposer
 
         if (assets.Count == 0)
         {
-            MultipartAlternative alternative = new("alternative")
+            // MultipartAlternative/Related already set their subtype; do not pass "alternative"/"related"
+            // strings into the params object[] ctor (MimeKit treats those as entity args).
+            MultipartAlternative alternative = new()
             {
                 plainPart,
                 htmlPart
@@ -60,7 +62,7 @@ public static partial class EmailBodyComposer
             return alternative;
         }
 
-        MultipartRelated related = new("related")
+        MultipartRelated related = new()
         {
             htmlPart
         };
@@ -80,7 +82,7 @@ public static partial class EmailBodyComposer
             related.Add(imagePart);
         }
 
-        MultipartAlternative alternativeWithImages = new("alternative")
+        MultipartAlternative alternativeWithImages = new()
         {
             plainPart,
             related
