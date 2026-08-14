@@ -29,6 +29,7 @@ public sealed class ListEnquiriesForDataTableEndpoint
             req.Sort!.Value,
             req.RequestCounter,
             req.Search,
+            req.Filter!.Value,
             ct);
 
         if (1 + (response.PageNumber - 1) * response.PageSize > response.TotalCount && response.TotalCount > 0)
@@ -39,6 +40,7 @@ public sealed class ListEnquiriesForDataTableEndpoint
                 req.Sort!.Value,
                 req.RequestCounter,
                 req.Search,
+                req.Filter!.Value,
                 ct);
         }
 
@@ -57,6 +59,12 @@ public sealed class ListEnquiriesForDataTableEndpoint
         if (req.Sort is null or SortType.Unsorted)
         {
             req.Sort = SortType.Updated;
+        }
+
+        req.Filter ??= EnquiryListFilter.Open;
+        if (!Enum.IsDefined(req.Filter.Value))
+        {
+            req.Filter = EnquiryListFilter.Open;
         }
     }
 }

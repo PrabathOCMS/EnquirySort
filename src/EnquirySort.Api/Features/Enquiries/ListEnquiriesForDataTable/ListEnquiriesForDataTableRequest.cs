@@ -10,6 +10,9 @@ public sealed class ListEnquiriesForDataTableRequest
     public SortType? Sort { get; set; }
     public string? Search { get; set; }
 
+    /// <summary>Open (default), Responded, Ignored, Routed, or All.</summary>
+    public EnquiryListFilter? Filter { get; set; }
+
     [FromHeader(headerName: "X-Request-Counter", isRequired: false)]
     public long? RequestCounter { get; set; }
 }
