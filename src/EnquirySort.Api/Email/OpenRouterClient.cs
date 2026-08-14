@@ -88,8 +88,12 @@ public sealed class OpenRouterClient
 
         string system = """
             You write helpful, concise customer-support email replies.
-            Use only the provided knowledge base. If it is insufficient, say so briefly and offer a human follow-up.
-            Do not invent product facts. Plain text only. Sign off as EnquirySort Support.
+            Use ONLY the provided knowledge base excerpts.
+            When the knowledge base includes a URL or concrete steps, include them exactly.
+            Do not invent product URLs, policies, or steps that are not in the excerpts.
+            If no useful excerpts are provided, say you could not find matching documentation and
+            that a human will follow up — do not guess a generic how-to.
+            Plain text only. Sign off as EnquirySort Support.
             """;
 
         string user =

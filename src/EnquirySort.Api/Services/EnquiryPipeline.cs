@@ -80,6 +80,10 @@ public sealed class EnquiryPipeline
         {
             string query = classification.CustomerQuestion ?? $"{message.Subject}\n{message.BodyText}";
             List<KnowledgeArticle> snippets = await _knowledgeArticles.SearchAsync(query, 3, cancellationToken);
+            _logger.LogInformation(
+                "Knowledge search for enquiry matched {Count} article(s) for query={Query}",
+                snippets.Count,
+                TruncateForLog(query, 120));
             string reply = await _openRouter.DraftReplyAsync(message, snippets, classification.CustomerQuestion, cancellationToken);
             enquiry.ReplyBody = reply;
 
@@ -138,6 +142,16 @@ public sealed class EnquiryPipeline
         }
 
         return $"{reason} ({suffix})";
+    }
+
+    private static string TruncateForLog(string value, int max)
+    {
+        if (string.IsNullOrEmpty(value) || value.Length <= max)
+        {
+            return value;
+        }
+
+        return value[..max] + "…";
     }
 
     private ClassificationResult ApplyThresholds(ClassificationResult classification, List<MailingList> lists)
