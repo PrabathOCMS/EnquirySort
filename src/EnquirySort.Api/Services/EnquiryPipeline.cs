@@ -9,6 +9,7 @@ namespace EnquirySort.Api.Services;
 public sealed class EnquiryPipeline
 {
     private readonly AppSettings _settings;
+    private readonly RuntimeAppSettings _runtimeSettings;
     private readonly OpenRouterClient _openRouter;
     private readonly ImapEmailClient _mail;
     private readonly MailingListsRepository _mailingLists;
@@ -18,6 +19,7 @@ public sealed class EnquiryPipeline
 
     public EnquiryPipeline(
         AppSettings settings,
+        RuntimeAppSettings runtimeSettings,
         OpenRouterClient openRouter,
         ImapEmailClient mail,
         MailingListsRepository mailingLists,
@@ -26,6 +28,7 @@ public sealed class EnquiryPipeline
         ILogger<EnquiryPipeline> logger)
     {
         _settings = settings;
+        _runtimeSettings = runtimeSettings;
         _openRouter = openRouter;
         _mail = mail;
         _mailingLists = mailingLists;
@@ -80,9 +83,12 @@ public sealed class EnquiryPipeline
             string reply = await _openRouter.DraftReplyAsync(message, snippets, classification.CustomerQuestion, cancellationToken);
             enquiry.ReplyBody = reply;
 
-            if (_settings.EnquiryWorker.ResponseMode == ResponseMode.Automatic)
+            Models.AppSetting runtime = await _runtimeSettings.GetAsync(cancellationToken);
+            ResponseMode responseMode = runtime.ResponseMode;
+
+            if (responseMode == ResponseMode.Automatic)
             {
-                await _mail.SendReplyAsync(message, reply, cancellationToken);
+                await _mail.SendReplyAsync(message, reply, runtime.EmailSignatureHtml, cancellationToken);
                 enquiry.ReplySent = !_settings.Mail.DryRun;
                 enquiry.ReplyStatus = enquiry.ReplySent ? ReplyStatus.Sent : ReplyStatus.Draft;
                 if (_settings.Mail.DryRun)

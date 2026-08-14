@@ -4,6 +4,7 @@ using EnquirySort.Api.Email;
 using EnquirySort.Api.Enums;
 using EnquirySort.Api.Models;
 using EnquirySort.Api.Repositories;
+using EnquirySort.Api.Services;
 using FastEndpoints;
 
 namespace EnquirySort.Api.Features.Enquiries.SendEnquiryReply;
@@ -13,12 +14,18 @@ public sealed class SendEnquiryReplyEndpoint : Endpoint<SendEnquiryReplyRequest,
     private readonly EnquiriesRepository _repo;
     private readonly ImapEmailClient _mail;
     private readonly AppSettings _settings;
+    private readonly RuntimeAppSettings _runtimeSettings;
 
-    public SendEnquiryReplyEndpoint(EnquiriesRepository repo, ImapEmailClient mail, AppSettings settings)
+    public SendEnquiryReplyEndpoint(
+        EnquiriesRepository repo,
+        ImapEmailClient mail,
+        AppSettings settings,
+        RuntimeAppSettings runtimeSettings)
     {
         _repo = repo;
         _mail = mail;
         _settings = settings;
+        _runtimeSettings = runtimeSettings;
     }
 
     public override void Configure()
@@ -90,7 +97,8 @@ public sealed class SendEnquiryReplyEndpoint : Endpoint<SendEnquiryReplyRequest,
                 Subject = current.Subject,
                 BodyText = current.BodyText
             };
-            await _mail.SendReplyAsync(original, replyBody, ct);
+            AppSetting runtime = await _runtimeSettings.GetAsync(ct);
+            await _mail.SendReplyAsync(original, replyBody, runtime.EmailSignatureHtml, ct);
         }
         catch (MailKit.Security.AuthenticationException ex)
         {

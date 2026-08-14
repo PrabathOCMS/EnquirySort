@@ -22,6 +22,16 @@ export const REPLY_STATUS_LABELS: Record<number, string> = {
   [REPLY_STATUS.SENT]: "Sent",
 };
 
+export const RESPONSE_MODE = {
+  AUTOMATIC: 0,
+  DRAFT: 1,
+} as const;
+
+export const RESPONSE_MODE_LABELS: Record<number, string> = {
+  [RESPONSE_MODE.AUTOMATIC]: "Automatic",
+  [RESPONSE_MODE.DRAFT]: "Draft",
+};
+
 export const SORT = {
   UNSORTED: "unsorted",
   UPDATED: "updated",
@@ -67,4 +77,19 @@ export function replyStatusLabel(status: number | string | null | undefined): st
 
   const numeric = typeof status === "number" ? status : Number(status);
   return REPLY_STATUS_LABELS[numeric] ?? String(status ?? "—");
+}
+
+export function responseModeLabel(mode: number | string | null | undefined): string {
+  if (typeof mode === "string") {
+    const normalized = mode.trim().toLowerCase();
+    if (normalized === "automatic") {
+      return "Automatic";
+    }
+    if (normalized === "draft") {
+      return "Draft";
+    }
+  }
+
+  const numeric = typeof mode === "number" ? mode : Number(mode);
+  return RESPONSE_MODE_LABELS[numeric] ?? String(mode ?? "—");
 }
