@@ -11,6 +11,7 @@ public sealed class EnquiryPipeline
     private readonly AppSettings _settings;
     private readonly RuntimeAppSettings _runtimeSettings;
     private readonly OpenRouterClient _openRouter;
+    private readonly TriageAgentClient _triageAgent;
     private readonly ImapEmailClient _mail;
     private readonly MailingListsRepository _mailingLists;
     private readonly KnowledgeArticlesRepository _knowledgeArticles;
@@ -21,6 +22,7 @@ public sealed class EnquiryPipeline
         AppSettings settings,
         RuntimeAppSettings runtimeSettings,
         OpenRouterClient openRouter,
+        TriageAgentClient triageAgent,
         ImapEmailClient mail,
         MailingListsRepository mailingLists,
         KnowledgeArticlesRepository knowledgeArticles,
@@ -30,6 +32,7 @@ public sealed class EnquiryPipeline
         _settings = settings;
         _runtimeSettings = runtimeSettings;
         _openRouter = openRouter;
+        _triageAgent = triageAgent;
         _mail = mail;
         _mailingLists = mailingLists;
         _knowledgeArticles = knowledgeArticles;
@@ -60,8 +63,33 @@ public sealed class EnquiryPipeline
     public async Task<Enquiry> ProcessMessageAsync(InboundEmail message, CancellationToken cancellationToken = default)
     {
         List<MailingList> lists = await _mailingLists.ListAllActiveAsync(cancellationToken);
-        ClassificationResult classification = await _openRouter.ClassifyAsync(message, lists, cancellationToken);
-        classification = ApplyThresholds(classification, lists);
+        List<KnowledgeArticle> catalog = await _knowledgeArticles.ListAllActiveAsync(cancellationToken);
+
+        ClassificationResult classification;
+        string? draftedReply = null;
+
+        if (_settings.Ai.Provider == AiProvider.BedrockAgent)
+        {
+            _logger.LogInformation("Using LangGraph Bedrock agent at {Url}", _settings.Ai.AgentBaseUrl);
+            TriageAgentResult agentResult = await _triageAgent.TriageAsync(
+                message,
+                lists,
+                catalog,
+                _settings.Ai.ResponseRules,
+                cancellationToken);
+            classification = ApplyThresholds(agentResult.Classification, lists);
+            draftedReply = agentResult.DraftReply;
+            _logger.LogInformation(
+                "Agent triage action={Action} confidence={Confidence:0.00} retrieved={Retrieved}",
+                classification.Action,
+                classification.Confidence,
+                agentResult.RetrievedArticleIds.Count);
+        }
+        else
+        {
+            classification = await _openRouter.ClassifyAsync(message, lists, cancellationToken);
+            classification = ApplyThresholds(classification, lists);
+        }
 
         Enquiry enquiry = new()
         {
@@ -78,35 +106,21 @@ public sealed class EnquiryPipeline
 
         if (classification.Action == EnquiryAction.Respond)
         {
-            string query = classification.CustomerQuestion ?? $"{message.Subject}\n{message.BodyText}";
-            List<KnowledgeArticle> catalog = await _knowledgeArticles.ListAllActiveAsync(cancellationToken);
-            List<KnowledgeArticle> snippets = await _openRouter.SelectRelevantKnowledgeAsync(
-                message,
-                classification.CustomerQuestion,
-                catalog,
-                topK: 3,
-                cancellationToken);
-
-            // Fallback if the model returned nothing usable (or catalog was large and selection failed).
-            if (snippets.Count == 0 && catalog.Count > 0)
+            string reply;
+            if (_settings.Ai.Provider == AiProvider.BedrockAgent)
             {
-                snippets = await _knowledgeArticles.SearchAsync(query, 3, cancellationToken);
-                _logger.LogInformation(
-                    "AI knowledge select returned 0; keyword fallback matched {Count} article(s)",
-                    snippets.Count);
+                reply = draftedReply ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(reply))
+                {
+                    // Agent classified respond but returned no draft — fall back locally.
+                    reply = await DraftWithOpenRouterAsync(message, classification, catalog, cancellationToken);
+                }
+            }
+            else
+            {
+                reply = await DraftWithOpenRouterAsync(message, classification, catalog, cancellationToken);
             }
 
-            _logger.LogInformation(
-                "Knowledge for reply: {Count} article(s) from catalog of {Catalog} for query={Query}",
-                snippets.Count,
-                catalog.Count,
-                TruncateForLog(query, 120));
-
-            string reply = await _openRouter.DraftReplyAsync(
-                message,
-                snippets,
-                classification.CustomerQuestion,
-                cancellationToken);
             enquiry.ReplyBody = reply;
 
             Models.AppSetting runtime = await _runtimeSettings.GetAsync(cancellationToken);
@@ -154,6 +168,41 @@ public sealed class EnquiryPipeline
         await _mail.MarkProcessedAsync(message.Uid, cancellationToken);
         Enquiry saved = await _enquiries.CreateEnquiryAsync(enquiry);
         return saved;
+    }
+
+    private async Task<string> DraftWithOpenRouterAsync(
+        InboundEmail message,
+        ClassificationResult classification,
+        List<KnowledgeArticle> catalog,
+        CancellationToken cancellationToken)
+    {
+        string query = classification.CustomerQuestion ?? $"{message.Subject}\n{message.BodyText}";
+        List<KnowledgeArticle> snippets = await _openRouter.SelectRelevantKnowledgeAsync(
+            message,
+            classification.CustomerQuestion,
+            catalog,
+            topK: 3,
+            cancellationToken);
+
+        if (snippets.Count == 0 && catalog.Count > 0)
+        {
+            snippets = await _knowledgeArticles.SearchAsync(query, 3, cancellationToken);
+            _logger.LogInformation(
+                "AI knowledge select returned 0; keyword fallback matched {Count} article(s)",
+                snippets.Count);
+        }
+
+        _logger.LogInformation(
+            "Knowledge for reply: {Count} article(s) from catalog of {Catalog} for query={Query}",
+            snippets.Count,
+            catalog.Count,
+            TruncateForLog(query, 120));
+
+        return await _openRouter.DraftReplyAsync(
+            message,
+            snippets,
+            classification.CustomerQuestion,
+            cancellationToken);
     }
 
     private static string AppendReason(string? reason, string suffix)

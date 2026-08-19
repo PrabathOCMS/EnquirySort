@@ -1,0 +1,818 @@
+{
+  "README.md": {
+    "mtime": 1787182194.7622833,
+    "seen": 1787182197.7899377,
+    "ast_hash": "1af288bf4825a5748103777a1785b3a9",
+    "semantic_hash": ""
+  },
+  "EnquirySort.slnx": {
+    "mtime": 1787182194.4422455,
+    "seen": 1787182197.7898529,
+    "ast_hash": "9e1008729941126eb7b3c92a1ccfee3b",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Configuration/AppSettings.cs": {
+    "mtime": 1787182194.7622833,
+    "seen": 1787182197.7898564,
+    "ast_hash": "bf3d86b8f96425be3a55c4323a2b64ed",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Configuration/SeedSettings.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.789858,
+    "ast_hash": "808e4685bb94c2c60f293882799b0206",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Email/ClassificationResult.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.789859,
+    "ast_hash": "4bbfaafae106274f38d29b2ffafde1e7",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Email/EmailBodyComposer.cs": {
+    "mtime": 1787182194.7622833,
+    "seen": 1787182197.7898598,
+    "ast_hash": "53d8076cdbf77eab327d3a2d30bac970",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Email/ImapEmailClient.cs": {
+    "mtime": 1787182194.7622833,
+    "seen": 1787182197.789861,
+    "ast_hash": "03acb419b15fceaafbe1cd492672ddda",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Email/InboundEmail.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7898617,
+    "ast_hash": "40f7645a397cbf11531739783b8bb595",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Email/OpenRouterClient.cs": {
+    "mtime": 1787182194.7622833,
+    "seen": 1787182197.7898624,
+    "ast_hash": "205930983df6cfc9da51b47fc0f61043",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/EnquirySort.Api.csproj": {
+    "mtime": 1787182194.7622833,
+    "seen": 1787182197.7898633,
+    "ast_hash": "4e04520751c50f4c4fb44517b624ea41",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Enums/EnquiryAction.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7898638,
+    "ast_hash": "aabe3660531072f09419b54b590e8ace",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Enums/EnquiryListFilter.cs": {
+    "mtime": 1787182194.7622833,
+    "seen": 1787182197.789865,
+    "ast_hash": "a43597e09b4b609d806ff5890d5e6252",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Enums/ReplyStatus.cs": {
+    "mtime": 1787182194.7622833,
+    "seen": 1787182197.7898657,
+    "ast_hash": "c1fd3ced59fc70c7d14e58347719c2fb",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Enums/ResponseMode.cs": {
+    "mtime": 1787182194.7622833,
+    "seen": 1787182197.7898664,
+    "ast_hash": "1e81b6b03d022f3681b6125603f015c7",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Enums/SortType.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7898672,
+    "ast_hash": "f145d44dd7ea72b34953b67022d3b292",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Enums/SqlQueryResult.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.789868,
+    "ast_hash": "33c81992524d803aaeecf5b4330cded9",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/AdminSettings/GetAppSettings/GetAppSettingsContext.cs": {
+    "mtime": 1787182194.7622833,
+    "seen": 1787182197.7898688,
+    "ast_hash": "35d901910aeb6f5c23a0f912b2892bac",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/AdminSettings/GetAppSettings/GetAppSettingsEndpoint.cs": {
+    "mtime": 1787182194.7622833,
+    "seen": 1787182197.7898693,
+    "ast_hash": "95c6063a066bfb606a8a4761a98cd473",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/AdminSettings/UpdateAppSettings/UpdateAppSettingsContext.cs": {
+    "mtime": 1787182194.7622833,
+    "seen": 1787182197.78987,
+    "ast_hash": "d4a56d1353137bd04c405a923b52f857",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/AdminSettings/UpdateAppSettings/UpdateAppSettingsEndpoint.cs": {
+    "mtime": 1787182194.7622833,
+    "seen": 1787182197.7898705,
+    "ast_hash": "379df2fd09fdc3d08ec8c32ba8214d39",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/AdminSettings/UpdateAppSettings/UpdateAppSettingsRequest.cs": {
+    "mtime": 1787182194.7622833,
+    "seen": 1787182197.7898715,
+    "ast_hash": "502d6f970358174f80fc15b0c80182c6",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/Enquiries/GetEnquiry/GetEnquiryContext.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.789872,
+    "ast_hash": "bba1dd092adca117d99c1aba1a6b553f",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/Enquiries/GetEnquiry/GetEnquiryEndpoint.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7898726,
+    "ast_hash": "8fcd1ffd8e18e3d8bae2ccb96efe9716",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/Enquiries/GetEnquiry/GetEnquiryRequest.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7898734,
+    "ast_hash": "a1e5871ac4d5d8d28e4e447183d7152e",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/Enquiries/ListEnquiriesForDataTable/ListEnquiriesForDataTableContext.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7898738,
+    "ast_hash": "0726deb7f311aff63a7bd494c16cd025",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/Enquiries/ListEnquiriesForDataTable/ListEnquiriesForDataTableEndpoint.cs": {
+    "mtime": 1787182194.7622833,
+    "seen": 1787182197.7898743,
+    "ast_hash": "aadf5ab3ff79006033f128ae9734e5d3",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/Enquiries/ListEnquiriesForDataTable/ListEnquiriesForDataTableRequest.cs": {
+    "mtime": 1787182194.7662838,
+    "seen": 1787182197.7898753,
+    "ast_hash": "344746a6b41be835438f074536ac1bbd",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/Enquiries/ProcessInbox/ProcessInboxContext.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7898757,
+    "ast_hash": "7bf4a2b0e93543ce4211eb960d8dbc66",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/Enquiries/ProcessInbox/ProcessInboxEndpoint.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7898765,
+    "ast_hash": "d5df6b761a4cfc2acb7e7aff3a731420",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/Enquiries/SendEnquiryReply/SendEnquiryReplyContext.cs": {
+    "mtime": 1787182194.7662838,
+    "seen": 1787182197.789877,
+    "ast_hash": "0bb229dfc4da16754e2d27b3c4ed8240",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/Enquiries/SendEnquiryReply/SendEnquiryReplyEndpoint.cs": {
+    "mtime": 1787182194.7662838,
+    "seen": 1787182197.7898777,
+    "ast_hash": "d58fd8d7de1bca16cb3fdc6df7d5cb87",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/Enquiries/SendEnquiryReply/SendEnquiryReplyRequest.cs": {
+    "mtime": 1787182194.7662838,
+    "seen": 1787182197.7898786,
+    "ast_hash": "b297d01ba24bea779aea26329bd96fc8",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/Enquiries/UpdateEnquiryDraft/UpdateEnquiryDraftContext.cs": {
+    "mtime": 1787182194.7662838,
+    "seen": 1787182197.789879,
+    "ast_hash": "1b9bf9a7f0c7ace14c5af2af3e9b90d4",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/Enquiries/UpdateEnquiryDraft/UpdateEnquiryDraftEndpoint.cs": {
+    "mtime": 1787182194.7662838,
+    "seen": 1787182197.7898798,
+    "ast_hash": "79daaaea4e88092448992474f78aaefd",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/Enquiries/UpdateEnquiryDraft/UpdateEnquiryDraftRequest.cs": {
+    "mtime": 1787182194.7662838,
+    "seen": 1787182197.7898805,
+    "ast_hash": "2073e33350b2f89038496427fcbbd30e",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/KnowledgeArticles/CreateKnowledgeArticle/CreateKnowledgeArticleContext.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.789881,
+    "ast_hash": "ca42c8e1b4f5c4e98f2bea08b678961f",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/KnowledgeArticles/CreateKnowledgeArticle/CreateKnowledgeArticleEndpoint.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7898817,
+    "ast_hash": "b3c2a9898b17d6d244e6bd89ee5713a9",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/KnowledgeArticles/CreateKnowledgeArticle/CreateKnowledgeArticleRequest.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7898824,
+    "ast_hash": "8bc0ac1d4f226a221c8d7aefbf02e7e7",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/KnowledgeArticles/DeleteKnowledgeArticle/DeleteKnowledgeArticleContext.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.789883,
+    "ast_hash": "5ae0174aa74eca86736abe7d609ff7f2",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/KnowledgeArticles/DeleteKnowledgeArticle/DeleteKnowledgeArticleEndpoint.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7898836,
+    "ast_hash": "433735892a51018a86b87a071cdc54b0",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/KnowledgeArticles/DeleteKnowledgeArticle/DeleteKnowledgeArticleRequest.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.789884,
+    "ast_hash": "a23d7bf584fde984f1bb65bc15353070",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/KnowledgeArticles/GetKnowledgeArticle/GetKnowledgeArticleContext.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.789885,
+    "ast_hash": "e97612a3871a50fc57b436a460135ff1",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/KnowledgeArticles/GetKnowledgeArticle/GetKnowledgeArticleEndpoint.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7898855,
+    "ast_hash": "3b55d1594d674ab51b9e3d7c08053b3c",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/KnowledgeArticles/GetKnowledgeArticle/GetKnowledgeArticleRequest.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7898881,
+    "ast_hash": "d24eb74de6d69dc794ebed5af1dc1e40",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/KnowledgeArticles/ListKnowledgeArticlesForDataTable/ListKnowledgeArticlesForDataTableContext.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7898889,
+    "ast_hash": "5fce8f52bbbb935147a5723ee363de45",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/KnowledgeArticles/ListKnowledgeArticlesForDataTable/ListKnowledgeArticlesForDataTableEndpoint.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7898896,
+    "ast_hash": "a988006bbe2441e787a9b8dbf3ea6a96",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/KnowledgeArticles/ListKnowledgeArticlesForDataTable/ListKnowledgeArticlesForDataTableRequest.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.78989,
+    "ast_hash": "a4f54d6c52948d303cbf77519231116e",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/KnowledgeArticles/ListKnowledgeArticlesForDropdown/ListKnowledgeArticlesForDropdownContext.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7898908,
+    "ast_hash": "d20506d160c3ef83aca19697b7ac77c1",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/KnowledgeArticles/ListKnowledgeArticlesForDropdown/ListKnowledgeArticlesForDropdownEndpoint.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7898912,
+    "ast_hash": "7daf10bf8841a8eaf62dfd4f7190b457",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/KnowledgeArticles/ListKnowledgeArticlesForDropdown/ListKnowledgeArticlesForDropdownRequest.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.789892,
+    "ast_hash": "196c86b992bda4c463f553c514700b3c",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/KnowledgeArticles/UpdateKnowledgeArticle/UpdateKnowledgeArticleContext.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7898927,
+    "ast_hash": "7a550ab0aeb55e286d18143eb5589e68",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/KnowledgeArticles/UpdateKnowledgeArticle/UpdateKnowledgeArticleEndpoint.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7898932,
+    "ast_hash": "7d3b8dc95261a9d33e29b3da7caf2bfe",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/KnowledgeArticles/UpdateKnowledgeArticle/UpdateKnowledgeArticleRequest.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7898936,
+    "ast_hash": "a14debad728d60466cefc5799a587905",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/MailingLists/CreateMailingList/CreateMailingListContext.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7898943,
+    "ast_hash": "e658138d7e3a2b310b780911c0ebaa61",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/MailingLists/CreateMailingList/CreateMailingListEndpoint.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7898948,
+    "ast_hash": "d8e0c7d3ac17031a78c8fded0e93ce25",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/MailingLists/CreateMailingList/CreateMailingListRequest.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7898958,
+    "ast_hash": "381c3992cc6cd4787f347940e23d625c",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/MailingLists/DeleteMailingList/DeleteMailingListContext.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7898965,
+    "ast_hash": "3b53800474111e44402cbeec0ddb7538",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/MailingLists/DeleteMailingList/DeleteMailingListEndpoint.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7898972,
+    "ast_hash": "de1389f07db63fbf7466050a361a7fef",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/MailingLists/DeleteMailingList/DeleteMailingListRequest.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.789898,
+    "ast_hash": "a72585b5b28ceb002ca17bcd7bda31a7",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/MailingLists/GetMailingList/GetMailingListContext.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7898986,
+    "ast_hash": "54780570e6f585bed5d97e950bacc787",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/MailingLists/GetMailingList/GetMailingListEndpoint.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7898993,
+    "ast_hash": "aa96020118f34c041f14960151891b4a",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/MailingLists/GetMailingList/GetMailingListRequest.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7899,
+    "ast_hash": "d56f52b38b1b9044a476a31c6bbb851a",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/MailingLists/ListMailingListsForDataTable/ListMailingListsForDataTableContext.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7899008,
+    "ast_hash": "2493fae365dbda5c5c1beea8cc7a77fb",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/MailingLists/ListMailingListsForDataTable/ListMailingListsForDataTableEndpoint.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7899013,
+    "ast_hash": "dbea216c13c755bbcf4021d8d953df4d",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/MailingLists/ListMailingListsForDataTable/ListMailingListsForDataTableRequest.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.789902,
+    "ast_hash": "b61cacf4fcb2492d4532267d484a1085",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/MailingLists/ListMailingListsForDropdown/ListMailingListsForDropdownContext.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.789903,
+    "ast_hash": "90a0d198ae2eb8c0764f87bfbc713301",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/MailingLists/ListMailingListsForDropdown/ListMailingListsForDropdownEndpoint.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7899034,
+    "ast_hash": "78bcd0a6c17949594842cc93303c3b61",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/MailingLists/ListMailingListsForDropdown/ListMailingListsForDropdownRequest.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.789904,
+    "ast_hash": "31274fa4d0cb9be01aa047da4b84775b",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/MailingLists/UpdateMailingList/UpdateMailingListContext.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7899048,
+    "ast_hash": "c077bd535d5b135e992c1abeb1d41b39",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/MailingLists/UpdateMailingList/UpdateMailingListEndpoint.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7899055,
+    "ast_hash": "c7393744f1659370c48a6f4fee40ea6c",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Features/MailingLists/UpdateMailingList/UpdateMailingListRequest.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7899063,
+    "ast_hash": "d2273cd7bd3656ff6aafd4de1c863d19",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Models/AppSetting.cs": {
+    "mtime": 1787182194.7662838,
+    "seen": 1787182197.789907,
+    "ast_hash": "c35a280bf5c71d81d48b371e43caa676",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Models/DataTableResponse.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7899077,
+    "ast_hash": "9f75f43bc3d1491427d7033d4b4dab75",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Models/DropdownResponse.cs": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7899082,
+    "ast_hash": "60df682bdf8a63505f123e3772ec835d",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Models/Enquiry.cs": {
+    "mtime": 1787182194.7662838,
+    "seen": 1787182197.789909,
+    "ast_hash": "c83a15e2cf03e625122048da4914ba99",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Models/KnowledgeArticle.cs": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.7899098,
+    "ast_hash": "3416604d48c6ab1d09fac8417d5cfca1",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Models/MailingList.cs": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.7899103,
+    "ast_hash": "e7b6a93b4ae9f7ddaca7f33353596408",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Models/MyErrorResponse.cs": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.789911,
+    "ast_hash": "0795044b1a47914c4a857c4a27d25cd4",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Models/SelectListItem.cs": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.7899115,
+    "ast_hash": "c3212b46e61249ccef386d5584f60479",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Program.cs": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.789912,
+    "ast_hash": "aecf3bf001d5c61ef312880d998e51d3",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Properties/launchSettings.json": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.789913,
+    "ast_hash": "b33c692e2ef900cdd7cde0ce1a02e147",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Repositories/AppSettingsRepository.cs": {
+    "mtime": 1787182194.7662838,
+    "seen": 1787182197.7899134,
+    "ast_hash": "075ef564c82d147dcfbf7892ae9faeed",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Repositories/EnquiriesRepository.cs": {
+    "mtime": 1787182194.7662838,
+    "seen": 1787182197.7899141,
+    "ast_hash": "184ba92b8f27ce09c01ca7f6c8588049",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Repositories/KnowledgeArticlesRepository.cs": {
+    "mtime": 1787182194.7662838,
+    "seen": 1787182197.7899148,
+    "ast_hash": "228861e3a9a31c86033db5806dd6fefe",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Repositories/MailingListsRepository.cs": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.7899153,
+    "ast_hash": "94551c1c7de43aa2e83ac51ec54eddde",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Services/DatabaseBootstrapper.cs": {
+    "mtime": 1787182194.7662838,
+    "seen": 1787182197.7899158,
+    "ast_hash": "fe85a59722272e19b8cc1d3c66e3e3b1",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Services/EnquiryInboxWorker.cs": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.7899172,
+    "ast_hash": "664b3bd0e3c40f5a015cb7bcab362797",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Services/EnquiryPipeline.cs": {
+    "mtime": 1787182194.7662838,
+    "seen": 1787182197.7899177,
+    "ast_hash": "6a35bb30f820ce6a4349cd30117d5676",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Services/RuntimeAppSettings.cs": {
+    "mtime": 1787182194.7662838,
+    "seen": 1787182197.7899184,
+    "ast_hash": "f98252721439c5b8db6e2b358e90dd7a",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/StartupExtensions.cs": {
+    "mtime": 1787182194.7662838,
+    "seen": 1787182197.789919,
+    "ast_hash": "8fb551922c695133370bef96663c77f3",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Utilities/EnsureOrderedProvider.cs": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.7899194,
+    "ast_hash": "0307952a498e12f56d0539c3041581a6",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Api/Utilities/Toolbox.cs": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.78992,
+    "ast_hash": "d868ba599bc27d7230cbede7a534dfce",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/package.json": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.7899208,
+    "ast_hash": "2e5f49506e1c46d1a6845b8b6ca97d15",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/src/App.svelte": {
+    "mtime": 1787182194.7662838,
+    "seen": 1787182197.7899215,
+    "ast_hash": "c66fd42f017ec17ea7aa7695a3a70f70",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/src/components/SignatureEditor.svelte": {
+    "mtime": 1787182194.7662838,
+    "seen": 1787182197.789922,
+    "ast_hash": "3b839dbdf257f07a47fd7434023f6dc2",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/src/helpers/api.ts": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.7899225,
+    "ast_hash": "febbbfe2b7f6e662f39ba422f66708a9",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/src/helpers/constants.ts": {
+    "mtime": 1787182194.7662838,
+    "seen": 1787182197.7899234,
+    "ast_hash": "e272518047f4b2862dd3c75777c88820",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/src/helpers/parseResponse.ts": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.7899241,
+    "ast_hash": "61f876756f0172b4f509750a738e6e0f",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/src/helpers/router.ts": {
+    "mtime": 1787182194.7662838,
+    "seen": 1787182197.7899246,
+    "ast_hash": "684b986d493219d702137a832bbde6f9",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/src/main.ts": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.7899253,
+    "ast_hash": "6754eb730810f7dd7273f4aea2c86474",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/src/pages/enquiries/Detail.svelte": {
+    "mtime": 1787182194.7662838,
+    "seen": 1787182197.7899258,
+    "ast_hash": "58a07711aae30c69540d79c80a430ff6",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/src/pages/enquiries/Index.svelte": {
+    "mtime": 1787182194.7662838,
+    "seen": 1787182197.7899263,
+    "ast_hash": "849f9b5a0681569939b4247d87626e81",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/src/pages/knowledge-articles/Create.svelte": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.7899272,
+    "ast_hash": "901ec665ac785e39c158d9055a2e9acc",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/src/pages/knowledge-articles/Detail.svelte": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.7899282,
+    "ast_hash": "92cd6021faa390d074449986aefa3195",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/src/pages/knowledge-articles/Index.svelte": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.7899287,
+    "ast_hash": "0dd7b129dcc981f2128cfb3cbe52c7a4",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/src/pages/knowledge-articles/Update.svelte": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.7899294,
+    "ast_hash": "a6703c264ff511d104acb7afc53c97c6",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/src/pages/mailing-lists/Create.svelte": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.7899299,
+    "ast_hash": "ab77e5d98017fb807410acc4a9b0030e",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/src/pages/mailing-lists/Detail.svelte": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.7899308,
+    "ast_hash": "699ef9c5422abd5019c6edd2b8fb60d3",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/src/pages/mailing-lists/Index.svelte": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.7899313,
+    "ast_hash": "c60e5da0e7990081c00e9f28a48bed70",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/src/pages/mailing-lists/Update.svelte": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.7899318,
+    "ast_hash": "2cb259438ee0a9ccfa1c48d86f64d877",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/src/pages/settings/Index.svelte": {
+    "mtime": 1787182194.7662838,
+    "seen": 1787182197.7899325,
+    "ast_hash": "ec5e5fa157a0997c85c40afb02202296",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/src/vite-env.d.ts": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.789933,
+    "ast_hash": "b4698577655263526a571c0e6a454110",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/svelte.config.js": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.789934,
+    "ast_hash": "c75647575a823f80e9d2e5e8bfb8c8bc",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/tsconfig.app.json": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.7899346,
+    "ast_hash": "2361dacf68c6c20276a699fb3e4139f8",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/tsconfig.json": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.789935,
+    "ast_hash": "a3d39fa780ebff65444de257f291ce6c",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/tsconfig.node.json": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.7899358,
+    "ast_hash": "f9cb81ddcea69ffdab672fc8c48dca66",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/vite.config.ts": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.7899363,
+    "ast_hash": "48dda5206bf243a57d7dc1df3386a591",
+    "semantic_hash": ""
+  },
+  "ai-agent-platform-frontend/SKILL.md": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7899387,
+    "ast_hash": "5078aae087b7b8e7b7612d2e57802d3a",
+    "semantic_hash": ""
+  },
+  "ai-agent-platform-frontend/agents/openai.yaml": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7899396,
+    "ast_hash": "58eafe5bff82a31797abff5f2511f4ce",
+    "semantic_hash": ""
+  },
+  "ai-agent-platform-frontend/references/frontend-patterns.md": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.78994,
+    "ast_hash": "b915b95eb72dd6bffadbeca4d69d886d",
+    "semantic_hash": ""
+  },
+  "docker-compose.yml": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.789941,
+    "ast_hash": "c565d2c37eb2a57d4369079bc92ea117",
+    "semantic_hash": ""
+  },
+  "scaffold-fastendpoints-crud/SKILL.md": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7899415,
+    "ast_hash": "2e337caef21e9da33e9ec395e71f9f46",
+    "semantic_hash": ""
+  },
+  "scaffold-fastendpoints-crud/reference/conventions.md": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7899423,
+    "ast_hash": "c2c7142a55075edfd83d64d0ef1a562b",
+    "semantic_hash": ""
+  },
+  "scaffold-fastendpoints-crud/reference/create.md": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7899427,
+    "ast_hash": "ffb19b8d5abfe5dc30d484dcb94b6a76",
+    "semantic_hash": ""
+  },
+  "scaffold-fastendpoints-crud/reference/database-schema.md": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7899435,
+    "ast_hash": "494aabba2a389412f046699c818ff8c7",
+    "semantic_hash": ""
+  },
+  "scaffold-fastendpoints-crud/reference/delete.md": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7899442,
+    "ast_hash": "0dade6cd8cfcc499f6539b5ed3d066d1",
+    "semantic_hash": ""
+  },
+  "scaffold-fastendpoints-crud/reference/get.md": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.789945,
+    "ast_hash": "c7d23098b8acf22a9cb82e65b69c98c7",
+    "semantic_hash": ""
+  },
+  "scaffold-fastendpoints-crud/reference/list-datatable.md": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7899454,
+    "ast_hash": "6c51a8dbc58443dcb5af4fcaae3183a8",
+    "semantic_hash": ""
+  },
+  "scaffold-fastendpoints-crud/reference/list-dropdown.md": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.789946,
+    "ast_hash": "a51bd3e1f839595a5afd09fb80217ac3",
+    "semantic_hash": ""
+  },
+  "scaffold-fastendpoints-crud/reference/philosophy.md": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.7899466,
+    "ast_hash": "921da3a23de347ac9783c47c6c3beac3",
+    "semantic_hash": ""
+  },
+  "scaffold-fastendpoints-crud/reference/testing.md": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.789947,
+    "ast_hash": "0dae6bd785b4f353bd62f718806900d4",
+    "semantic_hash": ""
+  },
+  "scaffold-fastendpoints-crud/reference/update.md": {
+    "mtime": 1787182194.446246,
+    "seen": 1787182197.789948,
+    "ast_hash": "b4655b15f428bc97e92f41ff4df2d924",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/README.md": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.7899487,
+    "ast_hash": "80f3529dfeec19b1e17fa4935c00e6ca",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/index.html": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.7899492,
+    "ast_hash": "2ca54e55ec39137be377d0884aa72830",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/public/favicon.svg": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.78995,
+    "ast_hash": "1bc59ecddffd2201f8dca24e89eb4de7",
+    "semantic_hash": ""
+  },
+  "src/EnquirySort.Web/public/icons.svg": {
+    "mtime": 1787182194.4502466,
+    "seen": 1787182197.7899506,
+    "ast_hash": "3b4fcfcf393eca4d264dca4a4663bc37",
+    "semantic_hash": ""
+  }
+}

@@ -29,3 +29,8 @@ __pycache__/
 .idea/
 .coverage
 htmlcov/
+.venv/
+
+# Python agent
+src/EnquirySort.Agent/.venv/
+src/EnquirySort.Agent/.env
