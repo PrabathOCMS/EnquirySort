@@ -34,3 +34,4 @@ htmlcov/
 # Python agent
 src/EnquirySort.Agent/.venv/
 src/EnquirySort.Agent/.env
+graphify-out/
