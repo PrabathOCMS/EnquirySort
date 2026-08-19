@@ -29,3 +29,6 @@ __pycache__/
 .idea/
 .coverage
 htmlcov/
+
+# Graphify
+graphify-out/
