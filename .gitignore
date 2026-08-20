@@ -13,7 +13,7 @@ dist/
 .env
 .env.local
 
-## Python (legacy)
+## Python
 .venv/
 venv/
 __pycache__/
@@ -23,20 +23,16 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 
+## Python agent
+src/EnquirySort.Agent/.venv/
+src/EnquirySort.Agent/.env
+
+## Graphify
+graphify-out/
+
 ## Misc
 .DS_Store
 *.log
 .idea/
 .coverage
 htmlcov/
-<<<<<<< HEAD
-
-# Graphify
-=======
-.venv/
-
-# Python agent
-src/EnquirySort.Agent/.venv/
-src/EnquirySort.Agent/.env
->>>>>>> origin/cursor/langgraph-bedrock-agent-51f9
-graphify-out/
