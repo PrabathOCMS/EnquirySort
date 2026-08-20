@@ -25,6 +25,10 @@ public static class StartupExtensions
         services.Configure<AppSettings>(configuration);
         services.AddSingleton(sp => sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<AppSettings>>().Value);
         services.AddHttpClient<OpenRouterClient>();
+        services.AddHttpClient<TriageAgentClient>(client =>
+        {
+            client.Timeout = TimeSpan.FromMinutes(2);
+        });
         services.AddSingleton<ImapEmailClient>();
         services.AddSingleton<EnquiryPipeline>();
         services.AddSingleton<DatabaseBootstrapper>();

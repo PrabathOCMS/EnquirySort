@@ -10,13 +10,30 @@ AI-powered inbox triage:
 On startup the API **creates the database/schema if needed** and **seeds demo data** when tables are empty (`Seed:Enabled=true`).
 
 ```text
-Inbox (IMAP) → OpenRouter → respond | route | ignore
+Inbox (IMAP) → AI provider → respond | route | ignore
                   │              │
                   ▼              ▼
      Draft or auto-send     Mailing list forward
                   │
                   ▼
         Human approve & send (Draft mode)
+```
+
+### AI providers
+
+| Provider | Config | Notes |
+|----------|--------|--------|
+| **OpenRouter** (default) | `Ai:Provider=OpenRouter` | Existing in-process OpenRouter calls |
+| **BedrockAgent** | `Ai:Provider=BedrockAgent` | Python **LangGraph** service using **Amazon Bedrock** |
+
+LangGraph owns the workflow (`classify → retrieve → apply response rules → draft`). LangChain (`langchain-aws`) provides the Bedrock chat model. See `src/EnquirySort.Agent/README.md`.
+
+```json
+"Ai": {
+  "Provider": "BedrockAgent",
+  "AgentBaseUrl": "http://127.0.0.1:8090",
+  "ResponseRules": "Be concise and professional. Use only the knowledge base..."
+}
 ```
 
 ## Response modes
@@ -170,6 +187,7 @@ On API startup, migration `002_ReplyStatus.sql` is applied automatically when `R
 | Path | Purpose |
 |------|---------|
 | `src/EnquirySort.Api` | API + inbox worker + runtime bootstrap/seed |
+| `src/EnquirySort.Agent` | LangGraph + Amazon Bedrock triage agent |
 | `src/EnquirySort.Web` | Svelte admin |
 | `database/001_InitialSchema.sql` | SQL Server DDL |
 | `database/002_ReplyStatus.sql` | Draft/sent reply status migration |

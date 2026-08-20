@@ -29,6 +29,14 @@ __pycache__/
 .idea/
 .coverage
 htmlcov/
+<<<<<<< HEAD
 
 # Graphify
+=======
+.venv/
+
+# Python agent
+src/EnquirySort.Agent/.venv/
+src/EnquirySort.Agent/.env
+>>>>>>> origin/cursor/langgraph-bedrock-agent-51f9
 graphify-out/
